@@ -1,0 +1,9 @@
+osx_image: xcode11
+language: objective-c
+script:
+- sudo gem install cocoapods -v 1.7.0
+- travis_retry pod repo update > /dev/null
+- pod lib lint --use-libraries && pod lib lint
+- carthage update
+- carthage build --no-skip-current && carthage archive
+- xcodebuild -project mParticle-Apple-Media-SDK.xcodeproj -scheme mParticle-Apple-Media-SDK -destination 'platform=iOS Simulator,OS=13.0,name=iPhone 11 Pro Max' test
