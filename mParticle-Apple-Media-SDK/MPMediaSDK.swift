@@ -333,7 +333,7 @@ import mParticle_Apple_SDK
         self.contentType = contentType
         self.streamType = streamType
         self.mediaSessionId = mediaSessionId
-        super.init(eventType: MPEventTypeMedia)
+        super.init(eventType: .media)
     }
 
     @objc public override func isEqual(_ object: Any?) -> Bool {
