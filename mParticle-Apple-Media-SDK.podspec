@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name             = "mParticle-Apple-Media-SDK"
-    s.version          = "1.0.0-beta.1"
+    s.version          = "1.0.0-beta.2"
     s.summary          = "mParticle Apple Media SDK"
 
     s.description      = <<-DESC
@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
     s.homepage         = "https://www.mparticle.com"
     s.license          = { :type => 'Apache 2.0', :file => 'LICENSE' }
     s.author           = { "mParticle" => "support@mparticle.com" }
-    s.source           = { :git => "https://github.com/mparticle/mparticle-apple-media.git", :tag => s.version.to_s }
+    s.source           = { :git => "https://github.com/mparticle/mparticle-apple-media-sdk.git", :tag => s.version.to_s }
     s.social_media_url = "https://twitter.com/mparticle"
 
     s.static_framework = true
