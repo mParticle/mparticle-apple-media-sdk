@@ -5,11 +5,12 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
     var coreSDK: MParticle?
     var mediaSession: MPMediaSession?
     var mediaEventHandler: ((MPMediaEvent) -> Void)?
+    var eventHandler: ((MPEvent) -> Void)?
 
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         coreSDK = MParticle.sharedInstance()
-        mediaSession = MPMediaSession(coreSDK: coreSDK, title: "foo title", mediaContentId: "12345", duration: 90000, contentType: .video, streamType: .onDemand)
+        mediaSession = MPMediaSession(coreSDK: coreSDK, mediaContentId: "12345", title: "foo title", duration: 90000, contentType: .video, streamType: .onDemand)
         MPListenerController.sharedInstance().addSdkListener(self)
     }
 
@@ -18,12 +19,65 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         MPListenerController.sharedInstance().removeSdkListener(self)
         mediaEventHandler = nil
     }
+    
+    func testInits() {
+        XCTAssertNotNil(mediaSession)
+        
+        XCTAssertFalse(mediaSession!.logMPEvents, "logMPEvents should default to false")
+        XCTAssertTrue(mediaSession!.logMediaEvents, "logMediaEvent should default to true")
+        XCTAssertEqual(mediaSession?.mediaContentId, "12345")
+        XCTAssertEqual(mediaSession?.title, "foo title")
+        XCTAssertEqual(mediaSession?.duration?.intValue, 90000)
+        XCTAssertEqual(mediaSession?.contentType, .video)
+        XCTAssertEqual(mediaSession?.streamType, .onDemand)
+        
+        let mediaEvent1 = mediaSession?.makeMediaEvent(name: .play)
+        
+        XCTAssertEqual(mediaEvent1?.mediaEventName, .play)
+        XCTAssertEqual(mediaEvent1?.mediaContentId, "12345")
+        XCTAssertEqual(mediaEvent1?.mediaContentTitle, "foo title")
+        XCTAssertEqual(mediaEvent1?.duration?.intValue, 90000)
+        XCTAssertEqual(mediaEvent1?.contentType, .video)
+        XCTAssertEqual(mediaEvent1?.streamType, .onDemand)
+
+        mediaSession = MPMediaSession(coreSDK: coreSDK, mediaContentId: "678", title: "foo title 2", duration: 80000, contentType: .audio, streamType: .liveStream, logMPEvents: true, logMediaEvents: false)
+
+        XCTAssertTrue(mediaSession!.logMPEvents, "logMPEvents should have been set to true")
+        XCTAssertFalse(mediaSession!.logMediaEvents, "logMediaEvent should have been set to false")
+        XCTAssertEqual(mediaSession?.mediaContentId, "678")
+        XCTAssertEqual(mediaSession?.title, "foo title 2")
+        XCTAssertEqual(mediaSession?.duration?.intValue, 80000)
+        XCTAssertEqual(mediaSession?.contentType, .audio)
+        XCTAssertEqual(mediaSession?.streamType, .liveStream)
+        
+        let mediaEvent2 = mediaSession?.makeMediaEvent(name: .play)
+        
+        XCTAssertEqual(mediaEvent2?.mediaEventName, .play)
+        XCTAssertEqual(mediaEvent2?.mediaContentId, "678")
+        XCTAssertEqual(mediaEvent2?.mediaContentTitle, "foo title 2")
+        XCTAssertEqual(mediaEvent2?.duration?.intValue, 80000)
+        XCTAssertEqual(mediaEvent2?.contentType, .audio)
+        XCTAssertEqual(mediaEvent2?.streamType, .liveStream)
+    }
 
     func testLogMediaSessionStart() {
         mediaSession?.logMediaSessionStart()
         let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
-            XCTAssertEqual(event.mediaEventType, .sessionStart)
+            XCTAssertEqual(event.mediaEventName, .sessionStart)
+            expectation.fulfill()
+        }
+
+        self.waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testLogMediaSessionStartAlternet() {
+        mediaSession = MPMediaSession(coreSDK: coreSDK, mediaContentId: "12345", title: "foo title", duration: 90000, contentType: .video, streamType: .onDemand, logMPEvents: true, logMediaEvents: false)
+
+        mediaSession?.logMediaSessionStart()
+        let expectation = self.expectation(description: "async work")
+        self.eventHandler = { (event: MPEvent) -> Void in
+            XCTAssertEqual(event.name, MPMediaEventNameString.sessionStart.rawValue)
             expectation.fulfill()
         }
 
@@ -34,7 +88,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         mediaSession?.logMediaSessionEnd()
         let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
-            XCTAssertEqual(event.mediaEventType, .sessionEnd)
+            XCTAssertEqual(event.mediaEventName, .sessionEnd)
             expectation.fulfill()
         }
 
@@ -45,7 +99,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         mediaSession?.logMediaContentEnd()
         let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
-            XCTAssertEqual(event.mediaEventType, .contentEnd)
+            XCTAssertEqual(event.mediaEventName, .contentEnd)
             expectation.fulfill()
         }
 
@@ -56,7 +110,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         mediaSession?.logPlay()
                 let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
-            XCTAssertEqual(event.mediaEventType, .play)
+            XCTAssertEqual(event.mediaEventName, .play)
             expectation.fulfill()
         }
 
@@ -67,7 +121,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         mediaSession?.logPause()
                 let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
-            XCTAssertEqual(event.mediaEventType, .pause)
+            XCTAssertEqual(event.mediaEventName, .pause)
             expectation.fulfill()
         }
 
@@ -78,7 +132,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         mediaSession?.logSeekStart(position: 20000)
                 let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
-            XCTAssertEqual(event.mediaEventType, .seekStart)
+            XCTAssertEqual(event.mediaEventName, .seekStart)
             XCTAssertEqual(event.seekPosition, 20000)
             expectation.fulfill()
         }
@@ -90,7 +144,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         mediaSession?.logSeekEnd(position: 30000)
                 let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
-            XCTAssertEqual(event.mediaEventType, .seekEnd)
+            XCTAssertEqual(event.mediaEventName, .seekEnd)
             XCTAssertEqual(event.seekPosition, 30000)
             expectation.fulfill()
         }
@@ -102,7 +156,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         let adContent = MPMediaAdContent(title: "foo ad title", id: "12345")
         let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
-            XCTAssertEqual(event.mediaEventType, .adStart)
+            XCTAssertEqual(event.mediaEventName, .adStart)
             XCTAssertEqual(event.adContent, adContent)
             expectation.fulfill()
         }
@@ -113,7 +167,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
     func testLogAdEnd() {
         let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
-            XCTAssertEqual(event.mediaEventType, .adEnd)
+            XCTAssertEqual(event.mediaEventName, .adEnd)
             expectation.fulfill()
         }
         mediaSession?.logAdEnd()
@@ -124,7 +178,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         mediaSession?.logAdClick()
                 let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
-            XCTAssertEqual(event.mediaEventType, .adClick)
+            XCTAssertEqual(event.mediaEventName, .adClick)
             expectation.fulfill()
         }
 
@@ -135,7 +189,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         mediaSession?.logAdSkip()
                 let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
-            XCTAssertEqual(event.mediaEventType, .adSkip)
+            XCTAssertEqual(event.mediaEventName, .adSkip)
             expectation.fulfill()
         }
 
@@ -147,7 +201,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         mediaSession?.logAdBreakStart(adBreak: adBreak)
                 let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
-            XCTAssertEqual(event.mediaEventType, .adBreakStart)
+            XCTAssertEqual(event.mediaEventName, .adBreakStart)
             XCTAssertEqual(event.adBreak, adBreak)
             expectation.fulfill()
         }
@@ -159,7 +213,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         mediaSession?.logAdBreakEnd()
                 let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
-            XCTAssertEqual(event.mediaEventType, .adBreakEnd)
+            XCTAssertEqual(event.mediaEventName, .adBreakEnd)
             expectation.fulfill()
         }
 
@@ -171,7 +225,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         mediaSession?.logSegmentStart(segment: segment)
                 let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
-            XCTAssertEqual(event.mediaEventType, .segmentStart)
+            XCTAssertEqual(event.mediaEventName, .segmentStart)
             XCTAssertEqual(event.segment, segment)
             expectation.fulfill()
         }
@@ -183,7 +237,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         mediaSession?.logSegmentEnd()
         let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
-            XCTAssertEqual(event.mediaEventType, .segmentEnd)
+            XCTAssertEqual(event.mediaEventName, .segmentEnd)
             expectation.fulfill()
         }
 
@@ -193,7 +247,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
     func testLogSegmentSkip() {
         let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
-            XCTAssertEqual(event.mediaEventType, .segmentSkip)
+            XCTAssertEqual(event.mediaEventName, .segmentSkip)
             expectation.fulfill()
         }
         mediaSession?.logSegmentSkip()
@@ -203,7 +257,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
     func testLogPlayheadPosition() {
         let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
-            XCTAssertEqual(event.mediaEventType, .updatePlayheadPosition)
+            XCTAssertEqual(event.mediaEventName, .updatePlayheadPosition)
             XCTAssertEqual(event.playheadPosition, 45000)
             expectation.fulfill()
         }
@@ -214,7 +268,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
     func testLogQoS() {
         let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
-            XCTAssertEqual(event.mediaEventType, .updateQoS)
+            XCTAssertEqual(event.mediaEventName, .updateQoS)
             XCTAssertEqual(event.qos?.bitRate, 80)
             XCTAssertEqual(event.qos?.droppedFrames, 7)
             XCTAssertEqual(event.qos?.fps, 60)
@@ -231,22 +285,28 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
     }
 
     func onAPICalled(_: String, stackTrace: [Any], isExternal: Bool, objects: [Any]?) {
-        var firstObj: Any
+        let firstObj: Any
         guard let objects = objects else {
             XCTAssert(false); return
         }
         if (objects.count > 0) {
             firstObj = objects[0]
-            guard let first = firstObj as? MPMediaEvent else {
-                // Ignore non-media events
-                return
-            }
+            
+            if let first = firstObj as? MPMediaEvent {
+                guard let mediaHandler = self.mediaEventHandler else {
+                    return
+                }
 
-            guard let handler = self.mediaEventHandler else {
-                XCTAssert(false); return
+                mediaHandler(first)
             }
+            
+            if let first = firstObj as? MPEvent {
+                guard let eventHandler = self.eventHandler else {
+                    return
+                }
 
-            handler(first)
+                eventHandler(first)
+            }
         }
     }
 }

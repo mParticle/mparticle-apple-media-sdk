@@ -1,6 +1,60 @@
 import UIKit
 import mParticle_Apple_SDK
 
+let MediaAttributeKeysMediaSessionId = "media_session_id"
+
+let MediaAttributeKeysPlayheadPosition = "playhead_position"
+
+//MediaConent
+let MediaAttributeKeysTitle = "content_title"
+let MediaAttributeKeysContentId = "content_id"
+let MediaAttributeKeysDuration = "content_duration"
+let MediaAttributeKeysStreamType = "stream_type"
+public enum MPMediaStreamTypeString: String, RawRepresentable {
+    case liveStream = "liveStream"
+    case onDemand = "onDemand"
+}
+let MediaAttributeKeysContentType = "content_type"
+public enum MPMediaContentTypeString: String, RawRepresentable {
+    case video = "video"
+    case audio = "audio"
+}
+
+//Seek
+let MediaAttributeKeysSeekPosition = "seek_position"
+
+//Buffer
+let MediaAttributeKeysBufferDuration = "buffer_duration"
+let MediaAttributeKeysBufferPercent = "buffer_percent"
+let MediaAttributeKeysBufferPosition = "buffer_position"
+
+//QoS
+let MediaAttributeKeysQosBitrate = "qos_bitrate"
+let MediaAttributeKeysQosFramesPerSecond = "qos_fps"
+let MediaAttributeKeysQosStartupTime = "qos_startup_time"
+let MediaAttributeKeysQosDroppedFrames = "qos_dropped_frames"
+
+//MediaAd
+let MediaAttributeKeysAdTitle = "ad_content_title"
+let MediaAttributeKeysAdDuration = "ad_content_duration"
+let MediaAttributeKeysAdId = "ad_content_id"
+let MediaAttributeKeysAdAdvertiser = "ad_content_advertiser"
+let MediaAttributeKeysAdCampaign = "ad_content_campaign"
+let MediaAttributeKeysAdCreative = "ad_content_creative"
+let MediaAttributeKeysAdPlacement = "ad_content_placement"
+let MediaAttributeKeysAdSiteId = "ad_content_site_id"
+
+//MediaAdBreak
+let MediaAttributeKeysAdBreakTitle = "ad_break_title"
+let MediaAttributeKeysAdBreakDuration = "ad_break_duration"
+let MediaAttributeKeysAdBreakPlaybackTime = "ad_break_playback_time"
+let MediaAttributeKeysAdBreakId = "ad_break"
+
+//Segment
+let MediaAttributeKeysSegTitle = "segment_title"
+let MediaAttributeKeysSegIndex = "segment_index"
+let MediaAttributeKeysSegDuration = "segment_duration"
+
 /// __ Time values, like duration and position, should be passed to the Media SDK in **milliseconds** __
 
 // MARK: content type
@@ -92,10 +146,14 @@ import mParticle_Apple_SDK
     @objc public var duration: NSNumber?
     @objc public let contentType: MPMediaContentType
     @objc public let streamType: MPMediaStreamType
+    @objc public var currentPlayheadPosition: NSNumber?
+    @objc public let logMPEvents: Bool
+    @objc public let logMediaEvents: Bool
     @objc public let mediaSessionId: String
     @objc public var adContent: MPMediaAdContent?
     @objc public var adBreak: MPMediaAdBreak?
     @objc public var segment: MPMediaSegment?
+    @objc public var mediaEventListener: ((MPMediaEvent)->Void)?
 
     // MARK: init
     /// Creates a media session object. This does not start a session, you can do so by calling `logMediaSessionStart`.
@@ -119,82 +177,127 @@ import mParticle_Apple_SDK
         self.contentType = contentType
         self.streamType = streamType
         self.mediaSessionId = NSUUID().uuidString
+        self.logMPEvents = false
+        self.logMediaEvents = true
+    }
+    
+    // MARK: init
+    /// Creates a media session object. This does not start a session, you can do so by calling `logMediaSessionStart`.
+    /// :returns: a Media session
+    /// :param: coreSDK The instance of mParticle core SDK to use
+    /// :param: mediaContentId A machine readable identifier representing the current media item
+    /// :param: title Session title
+    /// :param: duration The playback time of the media content in milliseconds
+    /// :param: contentType The type of the media content (e.g. video)
+    /// :param: streamType The stream type for the media (e.g. on-demand)
+    @objc public init(coreSDK: MParticle?, mediaContentId: String, title: String, duration: NSNumber?, contentType: MPMediaContentType, streamType: MPMediaStreamType, logMPEvents: Bool, logMediaEvents: Bool) {
+        if let coreSDK = coreSDK {
+            self.coreSDK = coreSDK
+        } else {
+            self.coreSDK = MParticle.sharedInstance()
+        }
+
+        self.title = title
+        self.mediaContentId = mediaContentId
+        self.duration = duration
+        self.contentType = contentType
+        self.streamType = streamType
+        self.mediaSessionId = NSUUID().uuidString
+        self.logMPEvents = logMPEvents
+        self.logMediaEvents = logMediaEvents
     }
 
     // MARK: factory method
     /// Creates an event using the state of the media session. (This method is called internally by the Media SDK.)
     /// :returns: a Media event
     /// :param: type the media event type for the event
-    @objc func makeEvent(type: MPMediaEventType) -> MPMediaEvent {
-        let mediaEvent = MPMediaEvent(type: type, title: self.title, mediaContentId: self.mediaContentId, duration: self.duration, contentType: self.contentType, streamType: self.streamType, mediaSessionId: self.mediaSessionId)
+    @objc func makeMediaEvent(name: MPMediaEventName) -> MPMediaEvent {
+        let mediaEvent = MPMediaEvent(name: name, title: self.title, mediaContentId: self.mediaContentId, duration: self.duration, contentType: self.contentType, streamType: self.streamType, mediaSessionId: self.mediaSessionId)
         return mediaEvent!
+    }
+    
+    /// Attempt to log the event with the Core SDK
+    @objc func logEvent(mediaEvent: MPMediaEvent) {
+        if let eventListener = self.mediaEventListener {
+            eventListener(mediaEvent)
+        }
+        
+        if self.logMediaEvents {
+            coreSDK.logEvent(mediaEvent)
+        }
+        
+        //We never want to log UpdatePlayheadPosition Media Events, they are far to high volume to be logging to our server
+        if self.logMPEvents && (mediaEvent.mediaEventName != .updatePlayheadPosition) {
+            let event = mediaEvent.toMPEvent()
+            coreSDK.logEvent(event)
+        }
     }
 
     /// Begins a media session
     @objc public func logMediaSessionStart() {
-        let mediaEvent = self.makeEvent(type: .sessionStart)
-        coreSDK.logEvent(mediaEvent)
+        let mediaEvent = self.makeMediaEvent(name: .sessionStart)
+        self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Ends the media session
     @objc public func logMediaSessionEnd() {
-        let mediaEvent = self.makeEvent(type: .sessionEnd)
-        coreSDK.logEvent(mediaEvent)
+        let mediaEvent = self.makeMediaEvent(name: .sessionEnd)
+        self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Denotes that the playhead position has reached the final position in the content
     @objc public func logMediaContentEnd() {
-        let mediaEvent = self.makeEvent(type: .contentEnd)
-        coreSDK.logEvent(mediaEvent)
+        let mediaEvent = self.makeMediaEvent(name: .contentEnd)
+        self.logEvent(mediaEvent: mediaEvent)
     }
 
     // MARK: play/pause
     /// Logs a play event. This should be called when the user has clicked the play button or autoplay takes place.
     @objc public func logPlay() {
-        let mediaEvent = self.makeEvent(type: .play)
-        coreSDK.logEvent(mediaEvent)
+        let mediaEvent = self.makeMediaEvent(name: .play)
+        self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Logs a pause event. This can be due to a system generated event or user action.
     @objc public func logPause() {
-        let mediaEvent = self.makeEvent(type: .pause)
-        coreSDK.logEvent(mediaEvent)
+        let mediaEvent = self.makeMediaEvent(name: .pause)
+        self.logEvent(mediaEvent: mediaEvent)
     }
 
     // MARK: seek
     /// Indicates that the user has started scrubbing through the content
     /// :param: position The starting position before the seek began
     @objc public func logSeekStart(position: NSNumber) {
-        let mediaEvent = self.makeEvent(type: .seekStart)
+        let mediaEvent = self.makeMediaEvent(name: .seekStart)
         mediaEvent.seekPosition = position
-        coreSDK.logEvent(mediaEvent)
+        self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Indicates that the user has stopped scrubbing through the content
     /// :param: position The ending position where the seek finished
     @objc public func logSeekEnd(position: NSNumber) {
-        let mediaEvent = self.makeEvent(type: .seekEnd)
+        let mediaEvent = self.makeMediaEvent(name: .seekEnd)
         mediaEvent.seekPosition = position
-        coreSDK.logEvent(mediaEvent)
+        self.logEvent(mediaEvent: mediaEvent)
     }
 
     // MARK: buffer
     /// Records time spent loading remote content for playback
     @objc public func logBufferStart(duration: NSNumber, bufferPercent: NSNumber, position: NSNumber) {
-        let mediaEvent = self.makeEvent(type: .bufferStart)
+        let mediaEvent = self.makeMediaEvent(name: .bufferStart)
         mediaEvent.bufferDuration = duration
         mediaEvent.bufferPercent = bufferPercent
         mediaEvent.bufferPosition = position
-        coreSDK.logEvent(mediaEvent)
+        self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Indicates that content loading has completed
     @objc public func logBufferEnd(duration: NSNumber, bufferPercent: NSNumber, position: NSNumber) {
-        let mediaEvent = self.makeEvent(type: .bufferEnd)
+        let mediaEvent = self.makeMediaEvent(name: .bufferEnd)
         mediaEvent.bufferDuration = duration
         mediaEvent.bufferPercent = bufferPercent
         mediaEvent.bufferPosition = position
-        coreSDK.logEvent(mediaEvent)
+        self.logEvent(mediaEvent: mediaEvent)
     }
 
     // MARK: ad break
@@ -202,14 +305,14 @@ import mParticle_Apple_SDK
     @objc public func logAdBreakStart(adBreak: MPMediaAdBreak) {
         self.adBreak = adBreak
         self.adBreak?.duration = duration
-        let mediaEvent = self.makeEvent(type: .adBreakStart)
+        let mediaEvent = self.makeMediaEvent(name: .adBreakStart)
         mediaEvent.adBreak = self.adBreak
-        coreSDK.logEvent(mediaEvent)
+        self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Indicates that the ad break is complete
     @objc public func logAdBreakEnd() {
-        let mediaEvent = self.makeEvent(type: .adBreakEnd)
+        let mediaEvent = self.makeMediaEvent(name: .adBreakEnd)
         mediaEvent.adBreak = self.adBreak
         coreSDK.logEvent(mediaEvent)
         self.adBreak = nil
@@ -219,29 +322,29 @@ import mParticle_Apple_SDK
     /// Indicates a given ad creative has started playing
     @objc public func logAdStart(adContent: MPMediaAdContent) {
         self.adContent = adContent
-        let mediaEvent = self.makeEvent(type: .adStart)
+        let mediaEvent = self.makeMediaEvent(name: .adStart)
         mediaEvent.adContent = self.adContent
-        coreSDK.logEvent(mediaEvent)
+        self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Records that the user clicked on the ad
     @objc public func logAdClick() {
-        let mediaEvent = self.makeEvent(type: .adClick)
+        let mediaEvent = self.makeMediaEvent(name: .adClick)
         mediaEvent.adContent = self.adContent
-        coreSDK.logEvent(mediaEvent)
+        self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Records that the user skipped the ad
     @objc public func logAdSkip() {
-        let mediaEvent = self.makeEvent(type: .adSkip)
+        let mediaEvent = self.makeMediaEvent(name: .adSkip)
         mediaEvent.adContent = self.adContent
-        coreSDK.logEvent(mediaEvent)
+        self.logEvent(mediaEvent: mediaEvent)
         self.adContent = nil
     }
 
     /// Ends the currently playing ad
     @objc public func logAdEnd() {
-        let mediaEvent = self.makeEvent(type: .adEnd)
+        let mediaEvent = self.makeMediaEvent(name: .adEnd)
         mediaEvent.adContent = self.adContent
         coreSDK.logEvent(mediaEvent)
         self.adContent = nil
@@ -251,43 +354,52 @@ import mParticle_Apple_SDK
     /// Log that a new segment has begun
     @objc public func logSegmentStart(segment: MPMediaSegment) {
         self.segment = segment
-        let mediaEvent = self.makeEvent(type: .segmentStart)
+        let mediaEvent = self.makeMediaEvent(name: .segmentStart)
         mediaEvent.segment = self.segment
-        coreSDK.logEvent(mediaEvent)
+        self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Indicate that the user skipped the current segment
     @objc public func logSegmentSkip() {
-        let mediaEvent = self.makeEvent(type: .segmentSkip)
+        let mediaEvent = self.makeMediaEvent(name: .segmentSkip)
         mediaEvent.segment = self.segment
-        coreSDK.logEvent(mediaEvent)
+        self.logEvent(mediaEvent: mediaEvent)
         self.segment = nil
     }
 
     /// End the current segment
     @objc public func logSegmentEnd() {
-        let mediaEvent = self.makeEvent(type: .segmentEnd)
+        let mediaEvent = self.makeMediaEvent(name: .segmentEnd)
         mediaEvent.segment = self.segment
-        coreSDK.logEvent(mediaEvent)
+        self.logEvent(mediaEvent: mediaEvent)
         self.segment = nil
     }
 
     /// Notify the SDK that the currently playing position of the content has changed
     /// :param: position The updated playhead position in milliseconds
     @objc public func logPlayheadPosition(position: NSNumber) {
-        let mediaEvent = self.makeEvent(type: .updatePlayheadPosition)
+        currentPlayheadPosition = position
+        let mediaEvent = self.makeMediaEvent(name: .updatePlayheadPosition)
         mediaEvent.playheadPosition = position
-        coreSDK.logEvent(mediaEvent)
+        self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Update Quality of Service (Qos) data
     /// :param: metadata The new QoS data object
     @objc public func logQoS(metadata: MPMediaQoS) {
-        let mediaEvent = self.makeEvent(type: .updateQoS)
+        let mediaEvent = self.makeMediaEvent(name: .updateQoS)
         mediaEvent.qos = metadata
-        coreSDK.logEvent(mediaEvent)
+        self.logEvent(mediaEvent: mediaEvent)
     }
-
+    
+    /// Log a custom media event
+    @objc public func buildMPEvent(name: String, customAttributes: Dictionary<String, Any>) -> MPEvent {
+        let mpEvent = MPEvent.init(name: name, type: .media)
+        let mediaEvent = self.makeMediaEvent(name: .play)
+        mpEvent?.customAttributes = mediaEvent.getEventAttributes()
+                
+        return mpEvent!
+    }
 }
 
 // MARK: event
@@ -300,7 +412,7 @@ import mParticle_Apple_SDK
 
     // MARK: common
     // Properties all or most events will have
-    @objc public var mediaEventType: MPMediaEventType
+    @objc public var mediaEventName: MPMediaEventName
     @objc public var mediaContentTitle: String
     @objc public var mediaContentId: String
     @objc public var duration: NSNumber?
@@ -325,8 +437,8 @@ import mParticle_Apple_SDK
     }
 
     // MARK: init
-    @objc public init?(type: MPMediaEventType, title: String, mediaContentId: String, duration: NSNumber?, contentType: MPMediaContentType, streamType: MPMediaStreamType, mediaSessionId: String) {
-        self.mediaEventType = type
+    @objc public init?(name: MPMediaEventName, title: String, mediaContentId: String, duration: NSNumber?, contentType: MPMediaContentType, streamType: MPMediaStreamType, mediaSessionId: String) {
+        self.mediaEventName = name
         self.mediaContentTitle = title
         self.mediaContentId = mediaContentId
         self.duration = duration
@@ -338,7 +450,7 @@ import mParticle_Apple_SDK
 
     @objc public override func isEqual(_ object: Any?) -> Bool {
         if let object = object as? MPMediaEvent {
-            return (self.mediaEventType == object.mediaEventType &&
+            return (self.mediaEventName == object.mediaEventName &&
                 self.mediaContentTitle == object.mediaContentTitle &&
                 self.mediaContentId == object.mediaContentId &&
                 self.duration == object.duration &&
@@ -360,7 +472,7 @@ import mParticle_Apple_SDK
     }
 
     @objc public override func copy(with zone: NSZone? = nil) -> Any {
-        let object: MPMediaEvent? = MPMediaEvent(type: self.mediaEventType, title: self.mediaContentTitle, mediaContentId: self.mediaContentId, duration: self.duration, contentType: self.contentType, streamType: self.streamType, mediaSessionId: self.mediaSessionId)
+        let object: MPMediaEvent? = MPMediaEvent(name: self.mediaEventName, title: self.mediaContentTitle, mediaContentId: self.mediaContentId, duration: self.duration, contentType: self.contentType, streamType: self.streamType, mediaSessionId: self.mediaSessionId)
         if let object = object {
             object.adContent = self.adContent
             object.segment = self.segment
@@ -377,12 +489,128 @@ import mParticle_Apple_SDK
         }
     }
 
+    @objc public func toMPEvent() -> MPEvent {
+        let eventNameString = MPMediaEvent.mediaEventTypeString(mediaEventType: self.mediaEventName)
+
+        let mpEvent = MPEvent.init(name: eventNameString, type: .media)
+        mpEvent?.customAttributes = self.getEventAttributes()
+                
+        return mpEvent!
+    }
+    
+    @objc func getSessionAttributes() -> Dictionary<String, Any> {
+        var sessionAttributes = Dictionary<String, String>()
+        sessionAttributes[MediaAttributeKeysMediaSessionId] = mediaSessionId
+        sessionAttributes[MediaAttributeKeysPlayheadPosition] = playheadPosition?.stringValue
+        sessionAttributes[MediaAttributeKeysTitle] = mediaContentTitle
+        sessionAttributes[MediaAttributeKeysContentId] = mediaContentId
+        sessionAttributes[MediaAttributeKeysDuration] = duration?.stringValue
+        sessionAttributes[MediaAttributeKeysStreamType] = (streamType == MPMediaStreamType.liveStream) ? MPMediaStreamTypeString.liveStream.rawValue : MPMediaStreamTypeString.onDemand.rawValue
+        sessionAttributes[MediaAttributeKeysContentType] = (contentType == MPMediaContentType.video) ? MPMediaContentTypeString.video.rawValue : MPMediaContentTypeString.video.rawValue
+        
+        return sessionAttributes
+    }
+    
+    @objc func getEventAttributes() -> Dictionary<String, Any> {
+        var sessionAttributes = self.getSessionAttributes()
+        
+        sessionAttributes[MediaAttributeKeysSeekPosition] = seekPosition?.stringValue
+        sessionAttributes[MediaAttributeKeysBufferDuration] = bufferDuration?.stringValue
+        sessionAttributes[MediaAttributeKeysBufferPercent] = bufferPercent?.stringValue
+        sessionAttributes[MediaAttributeKeysBufferPosition] = bufferPosition?.stringValue
+        
+        if let qos = qos {
+            sessionAttributes[MediaAttributeKeysQosBitrate] = qos.bitRate?.stringValue
+            sessionAttributes[MediaAttributeKeysQosFramesPerSecond] = qos.fps?.stringValue
+            sessionAttributes[MediaAttributeKeysQosStartupTime] = qos.startupTime?.stringValue
+            sessionAttributes[MediaAttributeKeysQosDroppedFrames] = qos.droppedFrames?.stringValue
+        }
+        
+        if let adContent = adContent {
+            sessionAttributes[MediaAttributeKeysAdTitle] = adContent.title
+            sessionAttributes[MediaAttributeKeysAdId] = adContent.id
+            sessionAttributes[MediaAttributeKeysAdAdvertiser] = adContent.advertiser
+            sessionAttributes[MediaAttributeKeysAdCampaign] = adContent.campaign
+            sessionAttributes[MediaAttributeKeysAdCreative] = adContent.creative
+            sessionAttributes[MediaAttributeKeysAdSiteId] = adContent.siteId
+            sessionAttributes[MediaAttributeKeysAdDuration] = adContent.duration?.stringValue
+            sessionAttributes[MediaAttributeKeysAdPlacement] = adContent.placement?.stringValue
+        }
+        
+        if let segment = segment {
+            sessionAttributes[MediaAttributeKeysSegTitle] = segment.title
+            sessionAttributes[MediaAttributeKeysSegIndex] = NSNumber(value: segment.index).stringValue
+            sessionAttributes[MediaAttributeKeysSegDuration] = segment.duration.stringValue
+        }
+        
+        if let adBreak = adBreak {
+            sessionAttributes[MediaAttributeKeysAdBreakTitle] = adBreak.title
+            sessionAttributes[MediaAttributeKeysAdBreakDuration] = adBreak.duration?.stringValue
+            sessionAttributes[MediaAttributeKeysAdBreakPlaybackTime] = playheadPosition?.stringValue
+            sessionAttributes[MediaAttributeKeysAdBreakId] = adBreak.id
+        }
+        
+        if let existingAttributes = customAttributes {
+            for key in existingAttributes.keys {
+                sessionAttributes[key] = existingAttributes[key]
+            }
+        }
+        
+        return sessionAttributes
+    }
+    
+    class func mediaEventTypeString(mediaEventType: MPMediaEventName) -> String {
+        switch mediaEventType {
+        case .play:
+            return MPMediaEventNameString.play.rawValue
+        case .pause:
+            return MPMediaEventNameString.pause.rawValue
+        case .contentEnd:
+            return MPMediaEventNameString.contentEnd.rawValue
+        case .sessionStart:
+            return MPMediaEventNameString.sessionStart.rawValue
+        case .sessionEnd:
+            return MPMediaEventNameString.sessionEnd.rawValue
+        case .seekStart:
+            return MPMediaEventNameString.seekStart.rawValue
+        case .seekEnd:
+            return MPMediaEventNameString.seekEnd.rawValue
+        case .bufferStart:
+            return MPMediaEventNameString.bufferStart.rawValue
+        case .bufferEnd:
+            return MPMediaEventNameString.bufferEnd.rawValue
+        case .updatePlayheadPosition:
+            return MPMediaEventNameString.updatePlayheadPosition.rawValue
+        case .adClick:
+            return MPMediaEventNameString.adClick.rawValue
+        case .adBreakStart:
+            return MPMediaEventNameString.adBreakStart.rawValue
+        case .adBreakEnd:
+            return MPMediaEventNameString.adBreakEnd.rawValue
+        case .adStart:
+            return MPMediaEventNameString.adStart.rawValue
+        case .adEnd:
+            return MPMediaEventNameString.adEnd.rawValue
+        case .adSkip:
+            return MPMediaEventNameString.adSkip.rawValue
+        case .segmentStart:
+            return MPMediaEventNameString.segmentStart.rawValue
+        case .segmentSkip:
+            return MPMediaEventNameString.segmentSkip.rawValue
+        case .segmentEnd:
+            return MPMediaEventNameString.segmentEnd.rawValue
+        case .updateQoS:
+            return MPMediaEventNameString.updateQoS.rawValue
+        default:
+            return "unknown"
+        }
+    }
 }
 
 // MARK: event type
 /// The type of a media event--this is set internally by the Media SDK on media event objects before forwarding to the core SDK.
 /// (You generally won't need this unless you need to call logBaseEvent for some reason.)
-@objc public enum MPMediaEventType: Int, RawRepresentable {
+@objc public enum MPMediaEventName: Int, RawRepresentable {
     case play = 23
     case pause = 24
     case contentEnd = 25
@@ -403,4 +631,33 @@ import mParticle_Apple_SDK
     case segmentSkip = 44
     case segmentEnd = 45
     case updateQoS = 46
+    case milestone = 47
+    case sessionSummary = 48
+    case adSessionSummary = 49
+}
+
+public enum MPMediaEventNameString: String, RawRepresentable {
+    case play = "Play"  //23
+    case pause = "Pause"  //24
+    case contentEnd = "Media Content End"  //25
+    case sessionStart = "Media Session Start"  //30
+    case sessionEnd = "Media Session End"  //31
+    case seekStart = "Seek Start"  //32
+    case seekEnd = "Seek End"  //33
+    case bufferStart = "Buffer Start"  //34
+    case bufferEnd = "Buffer End"  //35
+    case updatePlayheadPosition = "Update Playhead Position"  //36
+    case adClick = "Ad Click"  //37
+    case adBreakStart = "Ad Break Start"  //38
+    case adBreakEnd = "Ad Break End"  //39
+    case adStart = "Ad Start"  //40
+    case adEnd = "Ad End"  //41
+    case adSkip = "Ad Skip"  //42
+    case segmentStart = "Segment Start"  //43
+    case segmentSkip = "Segment Skip"  //44
+    case segmentEnd = "Segment End"  //45
+    case updateQoS = "Update QoS"  //46
+    case milestone = "Milestone"  //47
+    case sessionSummary = "Media Session Summary"  //48
+    case adSessionSummary = "Ad Session Summary"  //49
 }
