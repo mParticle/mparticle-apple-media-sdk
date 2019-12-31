@@ -116,12 +116,44 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
 
         self.waitForExpectations(timeout: 10, handler: nil)
     }
+    
+    func testLogPlayWithOptions() {
+        let options = Options()
+        options.currentPlayheadPosition = 45000
+        
+        mediaSession?.logPlay(options: options)
+                let expectation = self.expectation(description: "async work")
+        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+            XCTAssertEqual(event.mediaEventName, .play)
+            XCTAssertEqual(event.playheadPosition, 45000)
+            expectation.fulfill()
+        }
+
+        self.waitForExpectations(timeout: 10, handler: nil)
+    }
 
     func testLogPause() {
         mediaSession?.logPause()
                 let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .pause)
+            expectation.fulfill()
+        }
+
+        self.waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testLogPauseWithOptions() {
+        let options = Options()
+        options.currentPlayheadPosition = 48000
+        options.customAttributes = ["test": "tester"]
+        
+        mediaSession?.logPause(options: options)
+                let expectation = self.expectation(description: "async work")
+        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+            XCTAssertEqual(event.mediaEventName, .pause)
+            XCTAssertEqual(event.playheadPosition, 48000)
+            XCTAssertEqual(event.customAttributes?["test"] as? String, "tester")
             expectation.fulfill()
         }
 

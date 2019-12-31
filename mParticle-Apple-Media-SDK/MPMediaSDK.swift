@@ -55,6 +55,35 @@ let MediaAttributeKeysSegTitle = "segment_title"
 let MediaAttributeKeysSegIndex = "segment_index"
 let MediaAttributeKeysSegDuration = "segment_duration"
 
+/**
+* This is a series of constants that can be used to specify Media characteristics to be included
+* in a {@link com.mparticle.media.events.MediaEvent} or {@link com.mparticle.MPEvent}.
+* These values are common values used in Media services, and may be included in a {@link com.mparticle.media.events.MediaEvent} via
+* an {@link com.mparticle.media.events.Options} instance.
+*
+* @see com.mparticle.media.events.Options
+*/
+let AdIds = "media_session_ad_objects"
+let ContentAssetId = "content_asset_id"
+let ContentSeason = "content_season"
+let ContentEpisode = "content_episode"
+let ContentDaypart = "content_daypart"
+let ContentOriginator = "content_originator"
+let ContentNetwork = "content_network"
+let ContentMVPD = "content_mvpd"
+let ContentFeed = "content_feed"
+let ContentShow = "content_show"
+let ContentShowType = "content_show_type"
+let ContentGenre = "content_genre"
+let ContentRating = "content_rating"
+let ContentAuthorized = "content_authorized"
+let ContentFirstAirDate = "content_first_air_date"
+let ContentDigitalDate = "content_digital_date"
+let Milestone = "milestone"
+let PlayerInitialResolution = "player_initial_resolution"
+let PlayerName = "player_name"
+let PlayerOvp = "player_ovp"
+
 /// __ Time values, like duration and position, should be passed to the Media SDK in **milliseconds** __
 
 // MARK: content type
@@ -211,8 +240,8 @@ let MediaAttributeKeysSegDuration = "segment_duration"
     /// Creates an event using the state of the media session. (This method is called internally by the Media SDK.)
     /// :returns: a Media event
     /// :param: type the media event type for the event
-    @objc func makeMediaEvent(name: MPMediaEventName) -> MPMediaEvent {
-        let mediaEvent = MPMediaEvent(name: name, title: self.title, mediaContentId: self.mediaContentId, duration: self.duration, contentType: self.contentType, streamType: self.streamType, mediaSessionId: self.mediaSessionId)
+    @objc func makeMediaEvent(name: MPMediaEventName, options: Options? = nil) -> MPMediaEvent {
+        let mediaEvent = MPMediaEvent(name: name, title: self.title, mediaContentId: self.mediaContentId, duration: self.duration, contentType: self.contentType, streamType: self.streamType, mediaSessionId: self.mediaSessionId, options: options)
         return mediaEvent!
     }
     
@@ -234,57 +263,57 @@ let MediaAttributeKeysSegDuration = "segment_duration"
     }
 
     /// Begins a media session
-    @objc public func logMediaSessionStart() {
-        let mediaEvent = self.makeMediaEvent(name: .sessionStart)
+    @objc public func logMediaSessionStart(options: Options?  = nil) {
+        let mediaEvent = self.makeMediaEvent(name: .sessionStart, options: options)
         self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Ends the media session
-    @objc public func logMediaSessionEnd() {
-        let mediaEvent = self.makeMediaEvent(name: .sessionEnd)
+    @objc public func logMediaSessionEnd(options: Options?  = nil) {
+        let mediaEvent = self.makeMediaEvent(name: .sessionEnd, options: options)
         self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Denotes that the playhead position has reached the final position in the content
-    @objc public func logMediaContentEnd() {
-        let mediaEvent = self.makeMediaEvent(name: .contentEnd)
+    @objc public func logMediaContentEnd(options: Options?  = nil) {
+        let mediaEvent = self.makeMediaEvent(name: .contentEnd, options: options)
         self.logEvent(mediaEvent: mediaEvent)
     }
 
     // MARK: play/pause
     /// Logs a play event. This should be called when the user has clicked the play button or autoplay takes place.
-    @objc public func logPlay() {
-        let mediaEvent = self.makeMediaEvent(name: .play)
+    @objc public func logPlay(options: Options?  = nil) {
+        let mediaEvent = self.makeMediaEvent(name: .play, options: options)
         self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Logs a pause event. This can be due to a system generated event or user action.
-    @objc public func logPause() {
-        let mediaEvent = self.makeMediaEvent(name: .pause)
+    @objc public func logPause(options: Options?  = nil) {
+        let mediaEvent = self.makeMediaEvent(name: .pause, options: options)
         self.logEvent(mediaEvent: mediaEvent)
     }
 
     // MARK: seek
     /// Indicates that the user has started scrubbing through the content
     /// :param: position The starting position before the seek began
-    @objc public func logSeekStart(position: NSNumber) {
-        let mediaEvent = self.makeMediaEvent(name: .seekStart)
+    @objc public func logSeekStart(position: NSNumber, options: Options?  = nil) {
+        let mediaEvent = self.makeMediaEvent(name: .seekStart, options: options)
         mediaEvent.seekPosition = position
         self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Indicates that the user has stopped scrubbing through the content
     /// :param: position The ending position where the seek finished
-    @objc public func logSeekEnd(position: NSNumber) {
-        let mediaEvent = self.makeMediaEvent(name: .seekEnd)
+    @objc public func logSeekEnd(position: NSNumber, options: Options?  = nil) {
+        let mediaEvent = self.makeMediaEvent(name: .seekEnd, options: options)
         mediaEvent.seekPosition = position
         self.logEvent(mediaEvent: mediaEvent)
     }
 
     // MARK: buffer
     /// Records time spent loading remote content for playback
-    @objc public func logBufferStart(duration: NSNumber, bufferPercent: NSNumber, position: NSNumber) {
-        let mediaEvent = self.makeMediaEvent(name: .bufferStart)
+    @objc public func logBufferStart(duration: NSNumber, bufferPercent: NSNumber, position: NSNumber, options: Options?  = nil) {
+        let mediaEvent = self.makeMediaEvent(name: .bufferStart, options: options)
         mediaEvent.bufferDuration = duration
         mediaEvent.bufferPercent = bufferPercent
         mediaEvent.bufferPosition = position
@@ -292,8 +321,8 @@ let MediaAttributeKeysSegDuration = "segment_duration"
     }
 
     /// Indicates that content loading has completed
-    @objc public func logBufferEnd(duration: NSNumber, bufferPercent: NSNumber, position: NSNumber) {
-        let mediaEvent = self.makeMediaEvent(name: .bufferEnd)
+    @objc public func logBufferEnd(duration: NSNumber, bufferPercent: NSNumber, position: NSNumber, options: Options?  = nil) {
+        let mediaEvent = self.makeMediaEvent(name: .bufferEnd, options: options)
         mediaEvent.bufferDuration = duration
         mediaEvent.bufferPercent = bufferPercent
         mediaEvent.bufferPosition = position
@@ -302,17 +331,17 @@ let MediaAttributeKeysSegDuration = "segment_duration"
 
     // MARK: ad break
     /// Logs that a sequence of one or more ads has begun
-    @objc public func logAdBreakStart(adBreak: MPMediaAdBreak) {
+    @objc public func logAdBreakStart(adBreak: MPMediaAdBreak, options: Options?  = nil) {
         self.adBreak = adBreak
         self.adBreak?.duration = duration
-        let mediaEvent = self.makeMediaEvent(name: .adBreakStart)
+        let mediaEvent = self.makeMediaEvent(name: .adBreakStart, options: options)
         mediaEvent.adBreak = self.adBreak
         self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Indicates that the ad break is complete
-    @objc public func logAdBreakEnd() {
-        let mediaEvent = self.makeMediaEvent(name: .adBreakEnd)
+    @objc public func logAdBreakEnd(options: Options?  = nil) {
+        let mediaEvent = self.makeMediaEvent(name: .adBreakEnd, options: options)
         mediaEvent.adBreak = self.adBreak
         coreSDK.logEvent(mediaEvent)
         self.adBreak = nil
@@ -320,31 +349,31 @@ let MediaAttributeKeysSegDuration = "segment_duration"
 
     // MARK: ad content
     /// Indicates a given ad creative has started playing
-    @objc public func logAdStart(adContent: MPMediaAdContent) {
+    @objc public func logAdStart(adContent: MPMediaAdContent, options: Options?  = nil) {
         self.adContent = adContent
-        let mediaEvent = self.makeMediaEvent(name: .adStart)
+        let mediaEvent = self.makeMediaEvent(name: .adStart, options: options)
         mediaEvent.adContent = self.adContent
         self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Records that the user clicked on the ad
-    @objc public func logAdClick() {
-        let mediaEvent = self.makeMediaEvent(name: .adClick)
+    @objc public func logAdClick(options: Options?  = nil) {
+        let mediaEvent = self.makeMediaEvent(name: .adClick, options: options)
         mediaEvent.adContent = self.adContent
         self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Records that the user skipped the ad
-    @objc public func logAdSkip() {
-        let mediaEvent = self.makeMediaEvent(name: .adSkip)
+    @objc public func logAdSkip(options: Options?  = nil) {
+        let mediaEvent = self.makeMediaEvent(name: .adSkip, options: options)
         mediaEvent.adContent = self.adContent
         self.logEvent(mediaEvent: mediaEvent)
         self.adContent = nil
     }
 
     /// Ends the currently playing ad
-    @objc public func logAdEnd() {
-        let mediaEvent = self.makeMediaEvent(name: .adEnd)
+    @objc public func logAdEnd(options: Options?  = nil) {
+        let mediaEvent = self.makeMediaEvent(name: .adEnd, options: options)
         mediaEvent.adContent = self.adContent
         coreSDK.logEvent(mediaEvent)
         self.adContent = nil
@@ -352,24 +381,24 @@ let MediaAttributeKeysSegDuration = "segment_duration"
 
     // MARK: segment
     /// Log that a new segment has begun
-    @objc public func logSegmentStart(segment: MPMediaSegment) {
+    @objc public func logSegmentStart(segment: MPMediaSegment, options: Options?  = nil) {
         self.segment = segment
-        let mediaEvent = self.makeMediaEvent(name: .segmentStart)
+        let mediaEvent = self.makeMediaEvent(name: .segmentStart, options: options)
         mediaEvent.segment = self.segment
         self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Indicate that the user skipped the current segment
-    @objc public func logSegmentSkip() {
-        let mediaEvent = self.makeMediaEvent(name: .segmentSkip)
+    @objc public func logSegmentSkip(options: Options?  = nil) {
+        let mediaEvent = self.makeMediaEvent(name: .segmentSkip, options: options)
         mediaEvent.segment = self.segment
         self.logEvent(mediaEvent: mediaEvent)
         self.segment = nil
     }
 
     /// End the current segment
-    @objc public func logSegmentEnd() {
-        let mediaEvent = self.makeMediaEvent(name: .segmentEnd)
+    @objc public func logSegmentEnd(options: Options?  = nil) {
+        let mediaEvent = self.makeMediaEvent(name: .segmentEnd, options: options)
         mediaEvent.segment = self.segment
         self.logEvent(mediaEvent: mediaEvent)
         self.segment = nil
@@ -386,16 +415,16 @@ let MediaAttributeKeysSegDuration = "segment_duration"
 
     /// Update Quality of Service (Qos) data
     /// :param: metadata The new QoS data object
-    @objc public func logQoS(metadata: MPMediaQoS) {
-        let mediaEvent = self.makeMediaEvent(name: .updateQoS)
+    @objc public func logQoS(metadata: MPMediaQoS, options: Options?  = nil) {
+        let mediaEvent = self.makeMediaEvent(name: .updateQoS, options: options)
         mediaEvent.qos = metadata
         self.logEvent(mediaEvent: mediaEvent)
     }
     
     /// Log a custom media event
-    @objc public func buildMPEvent(name: String, customAttributes: Dictionary<String, Any>) -> MPEvent {
+    @objc public func buildMPEvent(name: String, options: Options?  = nil) -> MPEvent {
         let mpEvent = MPEvent.init(name: name, type: .media)
-        let mediaEvent = self.makeMediaEvent(name: .play)
+        let mediaEvent = self.makeMediaEvent(name: .play, options: options)
         mpEvent?.customAttributes = mediaEvent.getEventAttributes()
                 
         return mpEvent!
@@ -437,7 +466,7 @@ let MediaAttributeKeysSegDuration = "segment_duration"
     }
 
     // MARK: init
-    @objc public init?(name: MPMediaEventName, title: String, mediaContentId: String, duration: NSNumber?, contentType: MPMediaContentType, streamType: MPMediaStreamType, mediaSessionId: String) {
+    @objc public init?(name: MPMediaEventName, title: String, mediaContentId: String, duration: NSNumber?, contentType: MPMediaContentType, streamType: MPMediaStreamType, mediaSessionId: String, options: Options?  = nil) {
         self.mediaEventName = name
         self.mediaContentTitle = title
         self.mediaContentId = mediaContentId
@@ -445,7 +474,13 @@ let MediaAttributeKeysSegDuration = "segment_duration"
         self.contentType = contentType
         self.streamType = streamType
         self.mediaSessionId = mediaSessionId
+        
         super.init(eventType: .media)
+        
+        if (options != nil) {
+            self.playheadPosition = options?.currentPlayheadPosition
+            self.customAttributes = options?.customAttributes
+        }
     }
 
     @objc public override func isEqual(_ object: Any?) -> Bool {
@@ -472,7 +507,11 @@ let MediaAttributeKeysSegDuration = "segment_duration"
     }
 
     @objc public override func copy(with zone: NSZone? = nil) -> Any {
-        let object: MPMediaEvent? = MPMediaEvent(name: self.mediaEventName, title: self.mediaContentTitle, mediaContentId: self.mediaContentId, duration: self.duration, contentType: self.contentType, streamType: self.streamType, mediaSessionId: self.mediaSessionId)
+        let options = Options()
+        options.currentPlayheadPosition = self.playheadPosition
+        options.customAttributes = self.customAttributes
+        
+        let object: MPMediaEvent? = MPMediaEvent(name: self.mediaEventName, title: self.mediaContentTitle, mediaContentId: self.mediaContentId, duration: self.duration, contentType: self.contentType, streamType: self.streamType, mediaSessionId: self.mediaSessionId, options: options)
         if let object = object {
             object.adContent = self.adContent
             object.segment = self.segment
@@ -491,7 +530,6 @@ let MediaAttributeKeysSegDuration = "segment_duration"
 
     @objc public func toMPEvent() -> MPEvent {
         let eventNameString = MPMediaEvent.mediaEventTypeString(mediaEventType: self.mediaEventName)
-
         let mpEvent = MPEvent.init(name: eventNameString, type: .media)
         mpEvent?.customAttributes = self.getEventAttributes()
                 
@@ -605,6 +643,19 @@ let MediaAttributeKeysSegDuration = "segment_duration"
             return "unknown"
         }
     }
+}
+
+@objc public class Options: NSObject {
+    /**
+     * Update the playhead position for the given event, and for the MediaSession
+     */
+    var currentPlayheadPosition: NSNumber?
+    
+    /**
+     * Custom Attributes to be included within the generated {@link MediaEvent}. The key values
+     * can either be values defined in {@link com.mparticle.media.events.OptionsAttributeKeys} or custom
+     */
+    var customAttributes: Dictionary<String, Any>?
 }
 
 // MARK: event type

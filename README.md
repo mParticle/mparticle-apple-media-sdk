@@ -50,8 +50,16 @@ let mediaSession = MPMediaSession.init(
     contentType: .video,                // Content Type (Video or Audio)
     streamType: .onDemand)              // Stream Type (OnDemand, Live, etc.)
 
+
 mediaSession.logMediaSessionStart()
 mediaSession.logPlay()
+
+// If you'd like to update playhead position frequently or add custom data to each event you may pass an option object into each log method
+let options = Options()
+options.currentPlayheadPosition = 48000
+options.customAttributes = ["testKey": "testValue"]
+
+mediaSession.logPause(options: options)
 ```
 
 # Contribution Guidelines
