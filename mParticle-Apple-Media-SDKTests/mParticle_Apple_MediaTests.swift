@@ -117,10 +117,24 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.waitForExpectations(timeout: 10, handler: nil)
     }
     
+    func testLogPlayWithExistingPlayhead() {
+        mediaSession?.currentPlayheadPosition = 1400
+        mediaSession?.logPlay()
+                let expectation = self.expectation(description: "async work")
+        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+            XCTAssertEqual(event.mediaEventName, .play)
+            XCTAssertEqual(event.playheadPosition, 1400)
+            expectation.fulfill()
+        }
+
+        self.waitForExpectations(timeout: 10, handler: nil)
+    }
+    
     func testLogPlayWithOptions() {
         let options = Options()
         options.currentPlayheadPosition = 45000
         
+        mediaSession?.currentPlayheadPosition = 40
         mediaSession?.logPlay(options: options)
                 let expectation = self.expectation(description: "async work")
         self.mediaEventHandler = { (event: MPMediaEvent) -> Void in

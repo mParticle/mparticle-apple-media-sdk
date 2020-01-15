@@ -241,7 +241,7 @@ let PlayerOvp = "player_ovp"
     /// :returns: a Media event
     /// :param: type the media event type for the event
     @objc func makeMediaEvent(name: MPMediaEventName, options: Options? = nil) -> MPMediaEvent {
-        let mediaEvent = MPMediaEvent(name: name, title: self.title, mediaContentId: self.mediaContentId, duration: self.duration, contentType: self.contentType, streamType: self.streamType, mediaSessionId: self.mediaSessionId, options: options)
+        let mediaEvent = MPMediaEvent(name: name, session: self, options: options)
         return mediaEvent!
     }
     
@@ -466,7 +466,27 @@ let PlayerOvp = "player_ovp"
     }
 
     // MARK: init
-    @objc public init?(name: MPMediaEventName, title: String, mediaContentId: String, duration: NSNumber?, contentType: MPMediaContentType, streamType: MPMediaStreamType, mediaSessionId: String, options: Options?  = nil) {
+    @objc public init?(name: MPMediaEventName, session: MPMediaSession, options: Options? = nil) {
+        self.mediaEventName = name
+        self.mediaContentTitle = session.title
+        self.mediaContentId = session.mediaContentId
+        self.duration = session.duration
+        self.contentType = session.contentType
+        self.streamType = session.streamType
+        self.mediaSessionId = session.mediaSessionId
+        
+        super.init(eventType: .media)
+        
+        self.customAttributes = options?.customAttributes
+        if (options?.currentPlayheadPosition != nil) {
+            self.playheadPosition = options?.currentPlayheadPosition
+            session.currentPlayheadPosition = options?.currentPlayheadPosition
+        } else {
+            self.playheadPosition = session.currentPlayheadPosition
+        }
+    }
+    
+    internal init?(name: MPMediaEventName, title: String, mediaContentId: String, duration: NSNumber?, contentType: MPMediaContentType, streamType: MPMediaStreamType, mediaSessionId: String, options: Options) {
         self.mediaEventName = name
         self.mediaContentTitle = title
         self.mediaContentId = mediaContentId
@@ -477,10 +497,8 @@ let PlayerOvp = "player_ovp"
         
         super.init(eventType: .media)
         
-        if (options != nil) {
-            self.playheadPosition = options?.currentPlayheadPosition
-            self.customAttributes = options?.customAttributes
-        }
+        self.playheadPosition = options.currentPlayheadPosition
+        self.customAttributes = options.customAttributes
     }
 
     @objc public override func isEqual(_ object: Any?) -> Bool {
@@ -511,7 +529,7 @@ let PlayerOvp = "player_ovp"
         options.currentPlayheadPosition = self.playheadPosition
         options.customAttributes = self.customAttributes
         
-        let object: MPMediaEvent? = MPMediaEvent(name: self.mediaEventName, title: self.mediaContentTitle, mediaContentId: self.mediaContentId, duration: self.duration, contentType: self.contentType, streamType: self.streamType, mediaSessionId: self.mediaSessionId, options: options)
+        let object: MPMediaEvent? = MPMediaEvent(name: self.mediaEventName, title: self.mediaContentTitle, mediaContentId: mediaContentId, duration: duration, contentType: contentType, streamType: streamType, mediaSessionId: mediaSessionId, options: options)
         if let object = object {
             object.adContent = self.adContent
             object.segment = self.segment
