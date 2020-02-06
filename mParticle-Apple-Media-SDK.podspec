@@ -17,6 +17,7 @@ Pod::Spec.new do |s|
     s.swift_version = '5.0'
 
     s.ios.deployment_target = "9.0"
-    s.ios.source_files      = 'mParticle-Apple-Media-SDK/*.{h,swift}'
-    s.ios.dependency 'mParticle-Apple-SDK', '~> 7.0'
+    s.tvos.deployment_target = "9.0"
+    s.source_files      = 'mParticle-Apple-Media-SDK/*.{h,swift}'
+    s.dependency 'mParticle-Apple-SDK', '~> 7.0'
 end
