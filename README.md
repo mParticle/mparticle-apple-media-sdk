@@ -23,13 +23,13 @@ Below summarizes the major steps to get the Apple Media SDK up and running. In a
 ### Load mParticle via your app's Podfile or Cartfile:
 
 ```ruby
-pod 'mParticle-Apple-Media-SDK', '~> 1.0-beta.2'
+pod 'mParticle-Apple-Media-SDK', '~> 1.0'
 ```
 
 OR
 
 ```ogdl
-github "mparticle/mparticle-apple-media-sdk" "1.0.0-beta.2"
+github "mparticle/mparticle-apple-media-sdk" ~> 1.0
 ```
 
 ```swift
