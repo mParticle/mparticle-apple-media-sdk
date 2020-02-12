@@ -667,13 +667,13 @@ let PlayerOvp = "player_ovp"
     /**
      * Update the playhead position for the given event, and for the MediaSession
      */
-    var currentPlayheadPosition: NSNumber?
+     @objc public var currentPlayheadPosition: NSNumber?
     
     /**
      * Custom Attributes to be included within the generated {@link MediaEvent}. The key values
      * can either be values defined in {@link com.mparticle.media.events.OptionsAttributeKeys} or custom
      */
-    var customAttributes: Dictionary<String, Any>?
+     @objc public var customAttributes: Dictionary<String, Any>?
 }
 
 // MARK: event type
