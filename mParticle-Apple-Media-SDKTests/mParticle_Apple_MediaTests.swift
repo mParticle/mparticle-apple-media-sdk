@@ -10,7 +10,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         coreSDK = MParticle.sharedInstance()
-        mediaSession = MPMediaSession(coreSDK: coreSDK, mediaContentId: "12345", title: "foo title", duration: 90000, contentType: .video, streamType: .onDemand)
+        mediaSession = MPMediaSession(coreSDK: coreSDK, mediaContentId: "12345", title: "foo title", duration: 90000, contentType: .video, streamType: .onDemand, logMPEvents: false, logMediaEvents: true, completionSetting: .onEvent, testing: true)
         MPListenerController.sharedInstance().addSdkListener(self)
     }
 
@@ -23,8 +23,8 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
     func testInits() {
         XCTAssertNotNil(mediaSession)
         
-        XCTAssertFalse(mediaSession!.logMPEvents, "logMPEvents should default to false")
-        XCTAssertTrue(mediaSession!.logMediaEvents, "logMediaEvent should default to true")
+        XCTAssertFalse(mediaSession!.logMPEvents, "logMPEvents should be set to false")
+        XCTAssertTrue(mediaSession!.logMediaEvents, "logMediaEvent should be set to true")
         XCTAssertEqual(mediaSession?.mediaContentId, "12345")
         XCTAssertEqual(mediaSession?.title, "foo title")
         XCTAssertEqual(mediaSession?.duration?.intValue, 90000)
@@ -40,7 +40,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         XCTAssertEqual(mediaEvent1?.contentType, .video)
         XCTAssertEqual(mediaEvent1?.streamType, .onDemand)
 
-        mediaSession = MPMediaSession(coreSDK: coreSDK, mediaContentId: "678", title: "foo title 2", duration: 80000, contentType: .audio, streamType: .liveStream, logMPEvents: true, logMediaEvents: false)
+        mediaSession = MPMediaSession(coreSDK: coreSDK, mediaContentId: "678", title: "foo title 2", duration: 80000, contentType: .audio, streamType: .liveStream, logMPEvents: true, logMediaEvents: false, completionSetting: .onEvent, testing: true)
 
         XCTAssertTrue(mediaSession!.logMPEvents, "logMPEvents should have been set to true")
         XCTAssertFalse(mediaSession!.logMediaEvents, "logMediaEvent should have been set to false")
@@ -92,7 +92,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
     }
     
     func testLogMediaSessionStartAlternet() {
-        mediaSession = MPMediaSession(coreSDK: coreSDK, mediaContentId: "12345", title: "foo title", duration: 90000, contentType: .video, streamType: .onDemand, logMPEvents: true, logMediaEvents: false)
+        mediaSession = MPMediaSession(coreSDK: coreSDK, mediaContentId: "12345", title: "foo title", duration: 90000, contentType: .video, streamType: .onDemand, logMPEvents: true, logMediaEvents: false, completionSetting: .onEvent, testing: true)
 
         mediaSession?.logMediaSessionStart()
         let expectation = self.expectation(description: "async work")

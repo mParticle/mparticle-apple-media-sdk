@@ -55,6 +55,44 @@ let MediaAttributeKeysSegTitle = "segment_title"
 let MediaAttributeKeysSegIndex = "segment_index"
 let MediaAttributeKeysSegDuration = "segment_duration"
 
+//Summary Event
+let MPSessionSummary = "Media Session Summary"
+let MPSegmentSummary = "Media Segment Summary"
+let MPAdSummary = "Media Ad Summary"
+
+// Session Summary Attributes
+let mediaSessionIdKey = "media_session_id"
+let startTimestampKey = "media_session_start_time"
+let endTimestampKey = "media_session_end_time"
+let contentIdKey = "content_id"
+let contentTitleKey = "content_title"
+let mediaTimeSpentKey = "media_time_spent"
+let contentTimeSpentKey = "media_content_time_spent"
+let contentCompleteKey = "media_content_complete"
+let totalSegmentsKey = "media_session_segment_total"
+let totalAdTimeSpentKey = "media_total_ad_time_spent"
+let adTimeSpentRateKey = "media_ad_time_spent_rate"
+let totalAdsKey = "media_session_ad_total"
+let adIDsKey = "media_session_ad_objects"
+
+// Ad Summary Attributes
+let adBreakIdKey = "ad_break_id"
+let adContentIdKey = "ad_content_id"
+let adContentStartTimestampKey = "ad_content_start_time"
+let adContentEndTimestampKey = "ad_content_end_time"
+let adContentTitleKey = "ad_content_title"
+let adContentSkippedKey = "ad_skipped"
+let adContentCompletedKey = "ad_completed"
+
+// Segment Summary Attributes
+let segmentIndexKey = "segment_index"
+let segmentTitleKey = "segment_title"
+let segmentStartTimestampKey = "segment_start_time"
+let segmentEndTimestampKey = "segment_end_time"
+let segmentTimeSpentKey = "media_segment_time_spent"
+let segmentSkippedKey = "segment_skipped"
+let segmentCompletedKey = "segment_completed"
+
 /**
 * This is a series of constants that can be used to specify Media characteristics to be included
 * in a {@link com.mparticle.media.events.MediaEvent} or {@link com.mparticle.MPEvent}.
@@ -128,6 +166,11 @@ let PlayerOvp = "player_ovp"
     @objc public var creative: String?
     @objc public var placement: NSNumber?
     @objc public var siteId: String?
+    
+    internal var adStartTimestamp: Date?
+    internal var adEndTimestamp: Date?
+    internal var adSkipped = false
+    internal var adCompleted = false
 
     @objc public init(title: String, id: String) {
         self.title = title
@@ -141,6 +184,11 @@ let PlayerOvp = "player_ovp"
     @objc public var title: String
     @objc public var index: Int
     @objc public var duration: NSNumber
+    
+    internal var segmentStartTimestamp: Date?
+    internal var segmentEndTimestamp: Date?
+    internal var segmentSkipped = false
+    internal var segmentCompleted = false
 
     @objc public init(title: String, index: Int, duration: NSNumber) {
         self.title = title
@@ -183,6 +231,39 @@ let PlayerOvp = "player_ovp"
     @objc public var adBreak: MPMediaAdBreak?
     @objc public var segment: MPMediaSegment?
     @objc public var mediaEventListener: ((MPMediaEvent)->Void)?
+    
+    private var mediaSessionStartTimestamp: Date //Timestamp created on logMediaSessionStart event
+    private var mediaSessionEndTimestamp: Date //Timestamp updated when any event is loggged
+    private var mediaTimeSpent: Double {
+        get { //total seconds between media session start and end time
+            return self.mediaSessionEndTimestamp.timeIntervalSince(mediaSessionStartTimestamp)
+        }
+    }
+    private var mediaContentTimeSpent: Double {
+        get { //total seconds spent playing content
+            if (self.currentPlaybackStartTimestamp != nil) {
+                return self.storedPlaybackTime + Date().timeIntervalSince(self.currentPlaybackStartTimestamp!)
+            } else {
+                return self.storedPlaybackTime
+            }
+        }
+    }
+    private var mediaContentCompleteLimit: Int = 100
+    private var mediaContentComplete: Bool = false //Updates to true triggered by logMediaContentEnd (or if 90% or 95% of the content played), 0 or false if complete milestone not reached or a forced quit.
+    private var mediaSessionSegmentTotal: Int = 0 //number incremented with each logSegmentStart
+    private var mediaTotalAdTimeSpent: Double = 0 //total second sum of ad break time spent
+    private var mediaAdTimeSpentRate: Double {
+        get { //ad time spent / content time spent x 100
+            return self.mediaTotalAdTimeSpent/self.mediaContentTimeSpent*100
+        }
+    }
+    private var mediaSessionAdTotal: Int = 0 //number of ads played in the media session - increment on logAdStart
+    private var mediaSessionAdObjects: [String] = [] //array of unique identifiers for ads played in the media session - append ad_content_ID on logAdStart
+    
+    private var currentPlaybackStartTimestamp: Date? //Timestamp for beginning of current playback
+    private var storedPlaybackTime: Double = 0 //On Pause calculate playback time and clear currentPlaybackTime
+    private var sessionSummarySent = false // Ensures we only send summary event once
+    
 
     // MARK: init
     /// Creates a media session object. This does not start a session, you can do so by calling `logMediaSessionStart`.
@@ -208,6 +289,10 @@ let PlayerOvp = "player_ovp"
         self.mediaSessionId = NSUUID().uuidString
         self.logMPEvents = false
         self.logMediaEvents = true
+        
+        let currentTimestamp = Date()
+        self.mediaSessionStartTimestamp = currentTimestamp
+        self.mediaSessionEndTimestamp = currentTimestamp
     }
     
     // MARK: init
@@ -219,7 +304,10 @@ let PlayerOvp = "player_ovp"
     /// :param: duration The playback time of the media content in milliseconds
     /// :param: contentType The type of the media content (e.g. video)
     /// :param: streamType The stream type for the media (e.g. on-demand)
-    @objc public init(coreSDK: MParticle?, mediaContentId: String, title: String, duration: NSNumber?, contentType: MPMediaContentType, streamType: MPMediaStreamType, logMPEvents: Bool, logMediaEvents: Bool) {
+    /// :param: logMPEvents Set to true if you would like custom events forwarded to the mParticle SDK
+    /// :param: logMediaEvents Set to true if you would like media events forwarded to the mParticle SDK
+    /// :param: completeLimit Int from 1 to 100 denotes percentage of progress needed to be considered "completed"
+    @objc public init(coreSDK: MParticle?, mediaContentId: String, title: String, duration: NSNumber?, contentType: MPMediaContentType, streamType: MPMediaStreamType, logMPEvents: Bool, logMediaEvents: Bool, completeLimit: Int) {
         if let coreSDK = coreSDK {
             self.coreSDK = coreSDK
         } else {
@@ -234,6 +322,25 @@ let PlayerOvp = "player_ovp"
         self.mediaSessionId = NSUUID().uuidString
         self.logMPEvents = logMPEvents
         self.logMediaEvents = logMediaEvents
+        if ( 100 >= completeLimit && completeLimit > 0) {
+            self.mediaContentCompleteLimit = completeLimit
+        }
+        
+        let currentTimestamp = Date()
+        self.mediaSessionStartTimestamp = currentTimestamp
+        self.mediaSessionEndTimestamp = currentTimestamp
+    }
+    
+    internal convenience init(coreSDK: MParticle?, mediaContentId: String, title: String, duration: NSNumber?, contentType: MPMediaContentType, streamType: MPMediaStreamType, logMPEvents: Bool, logMediaEvents: Bool, completeLimit: Int, testing: Bool) {
+        self.init(coreSDK: coreSDK, mediaContentId: mediaContentId, title: title, duration: duration, contentType: contentType, streamType: streamType, logMPEvents: logMPEvents, logMediaEvents: logMediaEvents, completeLimit: completeLimit)
+        
+        self.sessionSummarySent = true
+    }
+    
+    deinit {
+        self.logAdSummary()
+        self.logSegmentSummary()
+        self.logSessionSummary()
     }
 
     // MARK: factory method
@@ -247,6 +354,13 @@ let PlayerOvp = "player_ovp"
     
     /// Attempt to log the event with the Core SDK
     @objc func logEvent(mediaEvent: MPMediaEvent) {
+        self.mediaSessionEndTimestamp = Date()
+        if (self.mediaContentCompleteLimit != 100) {
+            if ((duration != nil) && (self.currentPlayheadPosition?.intValue ?? 0)/duration!.intValue > (self.mediaContentCompleteLimit/100)) {
+                self.mediaContentComplete = true
+            }
+        }
+
         if let eventListener = self.mediaEventListener {
             eventListener(mediaEvent)
         }
@@ -264,6 +378,8 @@ let PlayerOvp = "player_ovp"
 
     /// Begins a media session
     @objc public func logMediaSessionStart(options: Options?  = nil) {
+        self.mediaSessionStartTimestamp = Date()
+        
         let mediaEvent = self.makeMediaEvent(name: .sessionStart, options: options)
         self.logEvent(mediaEvent: mediaEvent)
     }
@@ -272,10 +388,14 @@ let PlayerOvp = "player_ovp"
     @objc public func logMediaSessionEnd(options: Options?  = nil) {
         let mediaEvent = self.makeMediaEvent(name: .sessionEnd, options: options)
         self.logEvent(mediaEvent: mediaEvent)
+        
+        self.logSessionSummary()
     }
 
     /// Denotes that the playhead position has reached the final position in the content
     @objc public func logMediaContentEnd(options: Options?  = nil) {
+        self.mediaContentComplete = true
+        
         let mediaEvent = self.makeMediaEvent(name: .contentEnd, options: options)
         self.logEvent(mediaEvent: mediaEvent)
     }
@@ -283,12 +403,19 @@ let PlayerOvp = "player_ovp"
     // MARK: play/pause
     /// Logs a play event. This should be called when the user has clicked the play button or autoplay takes place.
     @objc public func logPlay(options: Options?  = nil) {
+        if (self.currentPlaybackStartTimestamp == nil) {
+            self.currentPlaybackStartTimestamp = Date()
+        }
+        
         let mediaEvent = self.makeMediaEvent(name: .play, options: options)
         self.logEvent(mediaEvent: mediaEvent)
     }
 
     /// Logs a pause event. This can be due to a system generated event or user action.
     @objc public func logPause(options: Options?  = nil) {
+        self.storedPlaybackTime = self.storedPlaybackTime + Date().timeIntervalSince(self.currentPlaybackStartTimestamp ?? Date())
+        self.currentPlaybackStartTimestamp = nil;
+        
         let mediaEvent = self.makeMediaEvent(name: .pause, options: options)
         self.logEvent(mediaEvent: mediaEvent)
     }
@@ -350,7 +477,11 @@ let PlayerOvp = "player_ovp"
     // MARK: ad content
     /// Indicates a given ad creative has started playing
     @objc public func logAdStart(adContent: MPMediaAdContent, options: Options?  = nil) {
+        self.mediaSessionAdTotal += 1
+        self.mediaSessionAdObjects.append(adContent.id)
         self.adContent = adContent
+        self.adContent?.adStartTimestamp = Date()
+        
         let mediaEvent = self.makeMediaEvent(name: .adStart, options: options)
         mediaEvent.adContent = self.adContent
         self.logEvent(mediaEvent: mediaEvent)
@@ -365,24 +496,39 @@ let PlayerOvp = "player_ovp"
 
     /// Records that the user skipped the ad
     @objc public func logAdSkip(options: Options?  = nil) {
+        if (self.adContent?.adStartTimestamp != nil) {
+            self.adContent?.adEndTimestamp = Date()
+            self.adContent?.adSkipped = true
+            self.mediaTotalAdTimeSpent += self.adContent!.adEndTimestamp!.timeIntervalSince(self.adContent!.adStartTimestamp!)
+        }
+        
         let mediaEvent = self.makeMediaEvent(name: .adSkip, options: options)
         mediaEvent.adContent = self.adContent
         self.logEvent(mediaEvent: mediaEvent)
-        self.adContent = nil
+        self.logAdSummary()
     }
 
     /// Ends the currently playing ad
     @objc public func logAdEnd(options: Options?  = nil) {
+        if (self.adContent?.adStartTimestamp != nil) {
+            self.adContent?.adEndTimestamp = Date()
+            self.adContent?.adCompleted = true
+            self.mediaTotalAdTimeSpent += self.adContent!.adEndTimestamp!.timeIntervalSince(self.adContent!.adStartTimestamp!)
+        }
+        
         let mediaEvent = self.makeMediaEvent(name: .adEnd, options: options)
         mediaEvent.adContent = self.adContent
-        coreSDK.logEvent(mediaEvent)
-        self.adContent = nil
+        self.logEvent(mediaEvent: mediaEvent)
+        self.logAdSummary()
     }
 
     // MARK: segment
     /// Log that a new segment has begun
     @objc public func logSegmentStart(segment: MPMediaSegment, options: Options?  = nil) {
+        self.mediaSessionSegmentTotal += 1
         self.segment = segment
+        self.segment?.segmentStartTimestamp = Date()
+        
         let mediaEvent = self.makeMediaEvent(name: .segmentStart, options: options)
         mediaEvent.segment = self.segment
         self.logEvent(mediaEvent: mediaEvent)
@@ -390,18 +536,26 @@ let PlayerOvp = "player_ovp"
 
     /// Indicate that the user skipped the current segment
     @objc public func logSegmentSkip(options: Options?  = nil) {
+        self.segment?.segmentEndTimestamp = Date()
+        self.segment?.segmentSkipped = true
+        
         let mediaEvent = self.makeMediaEvent(name: .segmentSkip, options: options)
         mediaEvent.segment = self.segment
         self.logEvent(mediaEvent: mediaEvent)
-        self.segment = nil
+        
+        self.logSegmentSummary()
     }
 
     /// End the current segment
     @objc public func logSegmentEnd(options: Options?  = nil) {
+        self.segment?.segmentEndTimestamp = Date()
+        self.segment?.segmentCompleted = true
+        
         let mediaEvent = self.makeMediaEvent(name: .segmentEnd, options: options)
         mediaEvent.segment = self.segment
         self.logEvent(mediaEvent: mediaEvent)
-        self.segment = nil
+        
+        self.logSegmentSummary()
     }
 
     /// Notify the SDK that the currently playing position of the content has changed
@@ -428,6 +582,84 @@ let PlayerOvp = "player_ovp"
         mpEvent?.customAttributes = mediaEvent.getEventAttributes()
                 
         return mpEvent!
+    }
+    
+    private func logSessionSummary() {
+        if (!self.sessionSummarySent) {
+            let event = MPEvent.init(name: MPSessionSummary, type: .media)!
+            
+            var customAttributes: [String:Any] = [:]
+            customAttributes[mediaSessionIdKey] = self.mediaSessionId
+            customAttributes[startTimestampKey] = self.mediaSessionStartTimestamp
+            customAttributes[endTimestampKey] = self.mediaSessionEndTimestamp
+            customAttributes[contentIdKey] = self.mediaSessionId
+            customAttributes[contentTitleKey] = self.title
+            customAttributes[mediaTimeSpentKey] = self.mediaTimeSpent
+            customAttributes[contentTimeSpentKey] = self.mediaContentTimeSpent
+            customAttributes[contentCompleteKey] = self.mediaContentComplete
+            customAttributes[totalSegmentsKey] = self.mediaSessionSegmentTotal
+            customAttributes[totalAdTimeSpentKey] = self.mediaTotalAdTimeSpent
+            customAttributes[adTimeSpentRateKey] = self.mediaAdTimeSpentRate
+            customAttributes[totalAdsKey] = self.mediaSessionAdTotal
+            customAttributes[adIDsKey] = self.mediaSessionAdObjects
+            
+            event.customAttributes = customAttributes
+            coreSDK.logEvent(event)
+            
+            self.sessionSummarySent = true
+        }
+    }
+    
+    private func logSegmentSummary() {
+        if ((self.segment?.segmentStartTimestamp != nil)) {
+            if (self.segment!.segmentEndTimestamp == nil) {
+                self.segment!.segmentEndTimestamp = Date()
+            }
+            
+            let event = MPEvent.init(name: MPSegmentSummary, type: .media)!
+            
+            var customAttributes: [String:Any] = [:]
+            customAttributes[mediaSessionIdKey] = self.mediaSessionId
+            customAttributes[mediaContentId] = self.mediaContentId
+            customAttributes[segmentIndexKey] = self.segment?.index
+            customAttributes[segmentTitleKey] = self.segment?.title
+            customAttributes[segmentStartTimestampKey] = self.segment!.segmentStartTimestamp
+            customAttributes[segmentEndTimestampKey] = self.segment!.segmentEndTimestamp
+            customAttributes[segmentTimeSpentKey] = self.segment!.segmentEndTimestamp!.timeIntervalSince(self.segment!.segmentStartTimestamp!)
+            customAttributes[segmentSkippedKey] = self.segment!.segmentSkipped
+            customAttributes[segmentCompletedKey] = self.segment!.segmentCompleted
+
+            event.customAttributes = customAttributes
+            coreSDK.logEvent(event)
+            
+            self.segment = nil
+        }
+    }
+    
+    private func logAdSummary() {
+        if (self.adContent != nil) {
+            if (self.adContent?.adStartTimestamp != nil) {
+                self.adContent?.adEndTimestamp = Date()
+                self.mediaTotalAdTimeSpent += self.adContent!.adEndTimestamp!.timeIntervalSince(self.adContent!.adStartTimestamp!)
+            }
+            
+            let event = MPEvent.init(name: MPAdSummary, type: .media)!
+            
+            var customAttributes: [String:Any] = [:]
+            customAttributes[mediaSessionIdKey] = self.mediaSessionId
+            customAttributes[adBreakIdKey] = self.adBreak?.id
+            customAttributes[adContentIdKey] = self.adContent?.id
+            customAttributes[adContentStartTimestampKey] = self.adContent?.adStartTimestamp
+            customAttributes[adContentEndTimestampKey] = self.adContent?.adEndTimestamp
+            customAttributes[adContentTitleKey] = self.adContent?.title
+            customAttributes[adContentSkippedKey] = self.adContent?.adSkipped
+            customAttributes[adContentCompletedKey] = self.adContent?.adCompleted
+            
+            event.customAttributes = customAttributes
+            coreSDK.logEvent(event)
+            
+            self.adContent = nil
+        }
     }
 }
 
