@@ -42,6 +42,7 @@ let MediaAttributeKeysAdAdvertiser = "ad_content_advertiser"
 let MediaAttributeKeysAdCampaign = "ad_content_campaign"
 let MediaAttributeKeysAdCreative = "ad_content_creative"
 let MediaAttributeKeysAdPlacement = "ad_content_placement"
+let MediaAttributeKeysAdPosition = "ad_content_position"
 let MediaAttributeKeysAdSiteId = "ad_content_site_id"
 
 //MediaAdBreak
@@ -164,7 +165,8 @@ let PlayerOvp = "player_ovp"
     @objc public var advertiser: String?
     @objc public var campaign: String?
     @objc public var creative: String?
-    @objc public var placement: NSNumber?
+    @objc public var placement: String?
+    @objc public var position: NSNumber?
     @objc public var siteId: String?
     
     internal var adStartTimestamp: Date?
@@ -822,7 +824,8 @@ let PlayerOvp = "player_ovp"
             sessionAttributes[MediaAttributeKeysAdCreative] = adContent.creative
             sessionAttributes[MediaAttributeKeysAdSiteId] = adContent.siteId
             sessionAttributes[MediaAttributeKeysAdDuration] = adContent.duration?.stringValue
-            sessionAttributes[MediaAttributeKeysAdPlacement] = adContent.placement?.stringValue
+            sessionAttributes[MediaAttributeKeysAdPlacement] = adContent.placement
+            sessionAttributes[MediaAttributeKeysAdPosition] = adContent.position?.stringValue
         }
         
         if let segment = segment {
