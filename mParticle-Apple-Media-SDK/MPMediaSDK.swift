@@ -11,8 +11,11 @@ let MediaAttributeKeysContentId = "content_id"
 let MediaAttributeKeysDuration = "content_duration"
 let MediaAttributeKeysStreamType = "stream_type"
 public enum MPMediaStreamTypeString: String, RawRepresentable {
-    case liveStream = "liveStream"
-    case onDemand = "onDemand"
+    case liveStream = "LiveStream"
+    case onDemand = "OnDemand"
+    case linear = "Linear"
+    case podcast = "Podcast"
+    case audiobook = "Audiobook"
 }
 let MediaAttributeKeysContentType = "content_type"
 public enum MPMediaContentTypeString: String, RawRepresentable {
@@ -137,10 +140,11 @@ let PlayerOvp = "player_ovp"
 // MARK: stream type
 /// The type of the stream delivering the video or audio data
 @objc public enum MPMediaStreamType: Int, RawRepresentable {
-    /// User-chosen content that can be started and stopped at any time
     case onDemand
-    /// Content where the user can choose the station or stream, but not the playhead position
     case liveStream
+    case linear
+    case podcast
+    case audiobook
 }
 
 // MARK: ad break
@@ -795,7 +799,7 @@ let PlayerOvp = "player_ovp"
         sessionAttributes[MediaAttributeKeysTitle] = mediaContentTitle
         sessionAttributes[MediaAttributeKeysContentId] = mediaContentId
         sessionAttributes[MediaAttributeKeysDuration] = duration?.stringValue
-        sessionAttributes[MediaAttributeKeysStreamType] = (streamType == MPMediaStreamType.liveStream) ? MPMediaStreamTypeString.liveStream.rawValue : MPMediaStreamTypeString.onDemand.rawValue
+        sessionAttributes[MediaAttributeKeysStreamType] = MPMediaEvent.mediaStreamTypeString(mediaStreamType:streamType);
         sessionAttributes[MediaAttributeKeysContentType] = (contentType == MPMediaContentType.video) ? MPMediaContentTypeString.video.rawValue : MPMediaContentTypeString.video.rawValue
         
         return sessionAttributes
@@ -894,6 +898,23 @@ let PlayerOvp = "player_ovp"
             return MPMediaEventNameString.updateQoS.rawValue
         default:
             return "unknown"
+        }
+    }
+    
+    class func mediaStreamTypeString(mediaStreamType: MPMediaStreamType) -> String {
+        switch mediaStreamType {
+        case .liveStream:
+            return MPMediaStreamTypeString.liveStream.rawValue
+        case .onDemand:
+            return MPMediaStreamTypeString.onDemand.rawValue
+        case .linear:
+            return MPMediaStreamTypeString.linear.rawValue
+        case .podcast:
+            return MPMediaStreamTypeString.podcast.rawValue
+        case .audiobook:
+            return MPMediaStreamTypeString.audiobook.rawValue
+        default:
+            return ""
         }
     }
 }
