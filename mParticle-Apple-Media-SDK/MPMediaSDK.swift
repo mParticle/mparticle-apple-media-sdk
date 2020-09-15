@@ -603,7 +603,7 @@ let PlayerOvp = "player_ovp"
             customAttributes[totalAdTimeSpentKey] = self.mediaTotalAdTimeSpent
             customAttributes[adTimeSpentRateKey] = self.mediaAdTimeSpentRate
             customAttributes[totalAdsKey] = self.mediaSessionAdTotal
-            customAttributes[adIDsKey] = self.mediaSessionAdObjects
+            customAttributes[adIDsKey] = self.mediaSessionAdObjects.joined(separator: ", ")
             
             event.customAttributes = customAttributes
             coreSDK.logEvent(event)
