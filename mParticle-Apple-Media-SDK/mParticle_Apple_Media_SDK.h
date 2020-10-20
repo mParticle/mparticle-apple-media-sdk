@@ -7,4 +7,8 @@ FOUNDATION_EXPORT double mParticle_Apple_Media_SDKVersionNumber;
 FOUNDATION_EXPORT const unsigned char mParticle_Apple_Media_SDKVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <mParticle_Apple_Media_SDK/PublicHeader.h>
-#import <mParticle_Apple_SDK/mParticle.h>
+#if defined(__has_include) && __has_include(<mParticle_Apple_SDK/mParticle.h>)
+    #import <mParticle_Apple_SDK/mParticle.h>
+#else
+    @import mParticle_Apple_SDK;
+#endif
