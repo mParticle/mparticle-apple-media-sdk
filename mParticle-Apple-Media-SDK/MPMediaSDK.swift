@@ -598,7 +598,7 @@ let PlayerOvp = "player_ovp"
             customAttributes[mediaSessionIdKey] = self.mediaSessionId
             customAttributes[startTimestampKey] = self.mediaSessionStartTimestamp
             customAttributes[endTimestampKey] = self.mediaSessionEndTimestamp
-            customAttributes[contentIdKey] = self.mediaSessionId
+            customAttributes[contentIdKey] = self.mediaContentId
             customAttributes[contentTitleKey] = self.title
             customAttributes[mediaTimeSpentKey] = self.mediaTimeSpent
             customAttributes[contentTimeSpentKey] = self.mediaContentTimeSpent
@@ -626,7 +626,7 @@ let PlayerOvp = "player_ovp"
             
             var customAttributes: [String:Any] = [:]
             customAttributes[mediaSessionIdKey] = self.mediaSessionId
-            customAttributes[mediaContentId] = self.mediaContentId
+            customAttributes[contentIdKey] = self.mediaContentId
             customAttributes[segmentIndexKey] = self.segment?.index
             customAttributes[segmentTitleKey] = self.segment?.title
             customAttributes[segmentStartTimestampKey] = self.segment!.segmentStartTimestamp
