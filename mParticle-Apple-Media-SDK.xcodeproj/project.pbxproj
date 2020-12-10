@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		DB7CA49E23205CD900F1C47B /* mParticle_Apple_SDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DBC7002A2319AAF900981B75 /* mParticle_Apple_SDK.framework */; };
 		DBC7002D2319AB1C00981B75 /* mParticle_Apple_SDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DBC7002A2319AAF900981B75 /* mParticle_Apple_SDK.framework */; };
-		DBC700312319AC4500981B75 /* mParticle_Apple_SDK.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = DBC7002A2319AAF900981B75 /* mParticle_Apple_SDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DBD815F22319A7F500A9809C /* mParticle_Apple_Media_SDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DBD815E82319A7F400A9809C /* mParticle_Apple_Media_SDK.framework */; };
 		DBD815F72319A7F500A9809C /* mParticle_Apple_MediaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD815F62319A7F500A9809C /* mParticle_Apple_MediaTests.swift */; };
 		DBD815F92319A7F500A9809C /* mParticle_Apple_Media_SDK.h in Headers */ = {isa = PBXBuildFile; fileRef = DBD815EB2319A7F400A9809C /* mParticle_Apple_Media_SDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -25,19 +24,6 @@
 			remoteInfo = "mParticle-Apple-Media-SDK";
 		};
 /* End PBXContainerItemProxy section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		DBC700302319AC3F00981B75 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				DBC700312319AC4500981B75 /* mParticle_Apple_SDK.framework in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		DBC7002A2319AAF900981B75 /* mParticle_Apple_SDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = mParticle_Apple_SDK.framework; path = Carthage/Build/iOS/mParticle_Apple_SDK.framework; sourceTree = "<group>"; };
@@ -139,7 +125,6 @@
 				DBD815E42319A7F400A9809C /* Sources */,
 				DBD815E52319A7F400A9809C /* Frameworks */,
 				DBD815E62319A7F400A9809C /* Resources */,
-				DBC700302319AC3F00981B75 /* CopyFiles */,
 			);
 			buildRules = (
 			);
