@@ -52,7 +52,7 @@ let MediaAttributeKeysAdSiteId = "ad_content_site_id"
 let MediaAttributeKeysAdBreakTitle = "ad_break_title"
 let MediaAttributeKeysAdBreakDuration = "ad_break_duration"
 let MediaAttributeKeysAdBreakPlaybackTime = "ad_break_playback_time"
-let MediaAttributeKeysAdBreakId = "ad_break"
+let MediaAttributeKeysAdBreakId = "ad_break_id"
 
 //Segment
 let MediaAttributeKeysSegTitle = "segment_title"
