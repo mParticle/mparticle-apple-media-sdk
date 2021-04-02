@@ -476,7 +476,7 @@ let PlayerOvp = "player_ovp"
     @objc public func logAdBreakEnd(options: Options?  = nil) {
         let mediaEvent = self.makeMediaEvent(name: .adBreakEnd, options: options)
         mediaEvent.adBreak = self.adBreak
-        coreSDK.logEvent(mediaEvent)
+        self.logEvent(mediaEvent: mediaEvent)
         self.adBreak = nil
     }
 
