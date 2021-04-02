@@ -4,8 +4,66 @@ import XCTest
 class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
     var coreSDK: MParticle?
     var mediaSession: MPMediaSession?
-    var mediaEventHandler: ((MPMediaEvent) -> Void)?
-    var eventHandler: ((MPEvent) -> Void)?
+    
+    private var _mediaEventExpectation: XCTestExpectation?
+    private var _mediaEventHandler: ((MPMediaEvent) -> Void)?
+    var mediaEventHandler: ((MPMediaEvent) -> Void)? {
+        set {
+            guard let mediaHandler = newValue else {
+                _mediaEventHandler = nil
+                return
+            }
+            self._mediaEventHandler = newValue
+            self._mediaEventExpectation = self.expectation(description: "MediaSession event listener")
+            self.mediaSession?.mediaEventListener = { (event: MPMediaEvent) -> Void in
+                mediaHandler(event)
+                self._mediaEventExpectation?.fulfill()
+                
+            }
+        }
+        get {
+            return _mediaEventHandler
+        }
+    }
+    private var _coreMediaEventExpectation: XCTestExpectation?
+    private var _coreMediaEventHandler: ((MPMediaEvent) -> Void)? = {(event: MPMediaEvent) -> Void in XCTFail("Unexpected MediaEvent sent to Core")
+    }
+    var coreMediaEventHandler: ((MPMediaEvent) -> Void)? {
+        set {
+            guard let mediaEventHandler = newValue else {
+                _coreMediaEventHandler = nil
+                return
+            }
+            self._coreMediaEventExpectation = self.expectation(description: "Core SDK MediaEvent Listener")
+            self._coreMediaEventHandler = { (event: MPMediaEvent) -> Void in
+                mediaEventHandler(event)
+                self._coreMediaEventExpectation?.fulfill()
+            }
+        }
+        get {
+            return self._coreMediaEventHandler
+        }
+    }
+    
+    private var _coreMPEventExpectation: XCTestExpectation?
+    private var _coreMPEventHandler: ((MPEvent) -> Void)? = {(event: MPEvent) -> Void in XCTFail("Unexpected MPEvent sent to Core")
+    }
+    var coreMPEventHandler: ((MPEvent) -> Void)? {
+        set {
+            guard let mpEventHandler = newValue else {
+                self._coreMPEventHandler = nil
+                return
+            }
+            self._coreMPEventExpectation = self.expectation(description: "Core SDK MPEvent Listener")
+                self._coreMPEventHandler = { (event: MPEvent) -> Void in
+                    mpEventHandler(event)
+                    self._coreMPEventExpectation?.fulfill()
+                }
+        }
+        get {
+            return self._coreMPEventHandler
+        }
+    }
 
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -18,12 +76,13 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         MPListenerController.sharedInstance().removeSdkListener(self)
         mediaEventHandler = nil
+        coreMPEventHandler = nil
+        coreMediaEventHandler = nil
     }
     
     func testInits() {
         XCTAssertNotNil(mediaSession)
         
-        XCTAssertFalse(mediaSession!.logMPEvents, "logMPEvents should be set to false")
         XCTAssertTrue(mediaSession!.logMediaEvents, "logMediaEvent should be set to true")
         XCTAssertEqual(mediaSession?.mediaContentId, "12345")
         XCTAssertEqual(mediaSession?.title, "foo title")
@@ -61,14 +120,14 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
     }
 
     func testLogMediaSessionStart() {
-        mediaSession?.logMediaSessionStart()
-        let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .sessionStart)
-            expectation.fulfill()
         }
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
 
-        self.waitForExpectations(timeout: 10, handler: nil)
+        mediaSession?.logMediaSessionStart()
+        await()
     }
     
     func testLogMediaSessionStartWithOptions() {
@@ -79,75 +138,78 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         option.customAttributes = customAtt
         option.currentPlayheadPosition = 6000;
         
-        mediaSession?.logMediaSessionStart(options: option)
-        let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .sessionStart)
             XCTAssertEqual((event.customAttributes?["testKey"] as? String), customAtt["testKey"])
             XCTAssertEqual(event.playheadPosition, 6000)
-            expectation.fulfill()
+            
         }
-
-        self.waitForExpectations(timeout: 10, handler: nil)
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
+        mediaSession?.logMediaSessionStart(options: option)
+        await()
     }
     
     func testLogMediaSessionStartAlternet() {
         mediaSession = MPMediaSession(coreSDK: coreSDK, mediaContentId: "12345", title: "foo title", duration: 90000, contentType: .video, streamType: .onDemand, logMPEvents: true, logMediaEvents: false, completeLimit: 90, testing: true)
-
-        mediaSession?.logMediaSessionStart()
-        let expectation = self.expectation(description: "async work")
-        self.eventHandler = { (event: MPEvent) -> Void in
-            XCTAssertEqual(event.name, MPMediaEventNameString.sessionStart.rawValue)
-            expectation.fulfill()
+        
+        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+            XCTAssertEqual(event.mediaEventName, .sessionStart)
         }
-
-        self.waitForExpectations(timeout: 10, handler: nil)
+        
+        self.coreMPEventHandler = { (event: MPEvent) -> Void in
+            XCTAssertEqual(event.name, MPMediaEventNameString.sessionStart.rawValue)
+        }
+        
+        mediaSession?.logMediaSessionStart()
+        await()
     }
 
     func testLogMediaSessionEnd() {
-        mediaSession?.logMediaSessionEnd()
-        let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .sessionEnd)
-            expectation.fulfill()
         }
-
-        self.waitForExpectations(timeout: 10, handler: nil)
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
+        mediaSession?.logMediaSessionEnd()
+        await()
     }
 
     func testLogMediaContentEnd() {
-        mediaSession?.logMediaContentEnd()
-        let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .contentEnd)
-            expectation.fulfill()
         }
-
-        self.waitForExpectations(timeout: 10, handler: nil)
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
+        mediaSession?.logMediaContentEnd()
+        await()
     }
 
     func testLogPlay() {
-        mediaSession?.logPlay()
-                let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .play)
-            expectation.fulfill()
         }
-
-        self.waitForExpectations(timeout: 10, handler: nil)
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
+        mediaSession?.logPlay()
+        await()
     }
     
     func testLogPlayWithExistingPlayhead() {
-        mediaSession?.currentPlayheadPosition = 1400
-        mediaSession?.logPlay()
-                let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .play)
             XCTAssertEqual(event.playheadPosition, 1400)
-            expectation.fulfill()
         }
-
-        self.waitForExpectations(timeout: 10, handler: nil)
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
+        mediaSession?.currentPlayheadPosition = 1400
+        mediaSession?.logPlay()
+        await()
     }
     
     func testLogPlayWithOptions() {
@@ -155,201 +217,209 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         options.currentPlayheadPosition = 45000
         
         mediaSession?.currentPlayheadPosition = 40
-        mediaSession?.logPlay(options: options)
-                let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .play)
             XCTAssertEqual(event.playheadPosition, 45000)
-            expectation.fulfill()
         }
-
-        self.waitForExpectations(timeout: 10, handler: nil)
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
+        mediaSession?.logPlay(options: options)
+        await()
     }
 
     func testLogPause() {
-        mediaSession?.logPause()
-                let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .pause)
-            expectation.fulfill()
         }
-
-        self.waitForExpectations(timeout: 10, handler: nil)
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
+        mediaSession?.logPause()
+        await()
     }
     
     func testLogPauseWithOptions() {
         let options = Options()
         options.currentPlayheadPosition = 48000
         options.customAttributes = ["test": "tester"]
-        
-        mediaSession?.logPause(options: options)
-                let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .pause)
             XCTAssertEqual(event.playheadPosition, 48000)
             XCTAssertEqual(event.customAttributes?["test"] as? String, "tester")
-            expectation.fulfill()
         }
-
-        self.waitForExpectations(timeout: 10, handler: nil)
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
+        mediaSession?.logPause(options: options)
+        await()
     }
 
     func testLogSeekStart() {
-        mediaSession?.logSeekStart(position: 20000)
-                let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .seekStart)
             XCTAssertEqual(event.seekPosition, 20000)
-            expectation.fulfill()
         }
-
-        self.waitForExpectations(timeout: 10, handler: nil)
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
+        mediaSession?.logSeekStart(position: 20000)
+        await()
     }
 
     func testLogSeekEnd() {
-        mediaSession?.logSeekEnd(position: 30000)
-                let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .seekEnd)
             XCTAssertEqual(event.seekPosition, 30000)
-            expectation.fulfill()
         }
-
-        self.waitForExpectations(timeout: 10, handler: nil)
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
+        mediaSession?.logSeekEnd(position: 30000)
+        await()
     }
 
     func testLogAdStart() {
         let adContent = MPMediaAdContent(title: "foo ad title", id: "12345")
         adContent.placement = "first"
         adContent.position = 0
-        let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .adStart)
             XCTAssertEqual(event.adContent, adContent)
-            expectation.fulfill()
         }
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
         mediaSession?.logAdStart(adContent: adContent)
-        self.waitForExpectations(timeout: 10, handler: nil)
+        await()
     }
 
     func testLogAdEnd() {
-        let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .adEnd)
-            expectation.fulfill()
         }
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
         mediaSession?.logAdEnd()
-        self.waitForExpectations(timeout: 10, handler: nil)
+        await()
     }
 
     func testLogAdClick() {
-        mediaSession?.logAdClick()
-                let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .adClick)
-            expectation.fulfill()
         }
-
-        self.waitForExpectations(timeout: 10, handler: nil)
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
+        mediaSession?.logAdClick()
+        await()
     }
 
     func testLogAdSkip() {
-        mediaSession?.logAdSkip()
-                let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .adSkip)
-            expectation.fulfill()
         }
-
-        self.waitForExpectations(timeout: 10, handler: nil)
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
+        mediaSession?.logAdSkip()
+        await()
     }
 
     func testLogAdBreakStart() {
         let adBreak = MPMediaAdBreak(title: "foo adbreak title", id: "12345")
-        mediaSession?.logAdBreakStart(adBreak: adBreak)
-                let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .adBreakStart)
             XCTAssertEqual(event.adBreak, adBreak)
-            expectation.fulfill()
         }
-
-        self.waitForExpectations(timeout: 10, handler: nil)
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
+        mediaSession?.logAdBreakStart(adBreak: adBreak)
+        await()
     }
 
     func testLogAdBreakEnd() {
-        mediaSession?.logAdBreakEnd()
-                let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .adBreakEnd)
-            expectation.fulfill()
         }
-
-        self.waitForExpectations(timeout: 10, handler: nil)
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
+        mediaSession?.logAdBreakEnd()
+        self.await()
     }
 
     func testLogSegmentStart() {
         let segment = MPMediaSegment(title: "foo segment title", index: 3, duration: 30000)
-        mediaSession?.logSegmentStart(segment: segment)
-                let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .segmentStart)
             XCTAssertEqual(event.segment, segment)
-            expectation.fulfill()
         }
-
-        self.waitForExpectations(timeout: 10, handler: nil)
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
+        mediaSession?.logSegmentStart(segment: segment)
+        await()
     }
 
     func testLogSegmentEnd() {
-        mediaSession?.logSegmentEnd()
-        let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .segmentEnd)
-            expectation.fulfill()
         }
-
-        self.waitForExpectations(timeout: 10, handler: nil)
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
+        mediaSession?.logSegmentEnd()
+        await()
     }
 
     func testLogSegmentSkip() {
-        let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .segmentSkip)
-            expectation.fulfill()
         }
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
         mediaSession?.logSegmentSkip()
-        self.waitForExpectations(timeout: 10, handler: nil)
+        await()
     }
 
     func testLogPlayheadPosition() {
-        let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .updatePlayheadPosition)
             XCTAssertEqual(event.playheadPosition, 45000)
-            expectation.fulfill()
         }
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
         mediaSession?.logPlayheadPosition(position: 45000)
-        self.waitForExpectations(timeout: 10, handler: nil)
+        await()
     }
 
     func testLogQoS() {
-        let expectation = self.expectation(description: "async work")
-        self.mediaEventHandler = { (event: MPMediaEvent) -> Void in
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .updateQoS)
             XCTAssertEqual(event.qos?.bitRate, 80)
             XCTAssertEqual(event.qos?.droppedFrames, 7)
             XCTAssertEqual(event.qos?.fps, 60)
             XCTAssertEqual(event.qos?.startupTime, 2000)
-            expectation.fulfill()
         }
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
         let qos = MPMediaQoS()
         qos.bitRate = 80
         qos.droppedFrames = 7
         qos.fps = 60
         qos.startupTime = 2000
         mediaSession?.logQoS(metadata: qos)
-        self.waitForExpectations(timeout: 10, handler: nil)
+        await()
     }
 
     func onAPICalled(_: String, stackTrace: [Any], isExternal: Bool, objects: [Any]?) {
@@ -361,7 +431,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
             firstObj = objects[0]
             
             if let first = firstObj as? MPMediaEvent {
-                guard let mediaHandler = self.mediaEventHandler else {
+                guard let mediaHandler = self.coreMediaEventHandler else {
                     return
                 }
 
@@ -369,12 +439,16 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
             }
             
             if let first = firstObj as? MPEvent {
-                guard let eventHandler = self.eventHandler else {
+                guard let eventHandler = self.coreMPEventHandler else {
                     return
                 }
 
                 eventHandler(first)
             }
         }
+    }
+    
+    private func await() {
+        self.waitForExpectations(timeout: 10, handler: nil)
     }
 }
