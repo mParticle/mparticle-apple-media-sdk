@@ -714,6 +714,7 @@ let PlayerOvp = "player_ovp"
         self.mediaSessionId = session.mediaSessionId
         
         super.init(eventType: .media)
+        self.messageType = MPMessageType.media
         
         self.customAttributes = options?.customAttributes
         if (options?.currentPlayheadPosition != nil) {

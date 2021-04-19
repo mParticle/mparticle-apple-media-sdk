@@ -16,6 +16,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
             self._mediaEventHandler = newValue
             self._mediaEventExpectation = self.expectation(description: "MediaSession event listener")
             self.mediaSession?.mediaEventListener = { (event: MPMediaEvent) -> Void in
+                XCTAssertEqual(event.messageType, MPMessageType.media)
                 mediaHandler(event)
                 self._mediaEventExpectation?.fulfill()
                 
@@ -36,6 +37,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
             }
             self._coreMediaEventExpectation = self.expectation(description: "Core SDK MediaEvent Listener")
             self._coreMediaEventHandler = { (event: MPMediaEvent) -> Void in
+                XCTAssertEqual(event.messageType, MPMessageType.media)
                 mediaEventHandler(event)
                 self._coreMediaEventExpectation?.fulfill()
             }
@@ -56,6 +58,8 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
             }
             self._coreMPEventExpectation = self.expectation(description: "Core SDK MPEvent Listener")
                 self._coreMPEventHandler = { (event: MPEvent) -> Void in
+                    XCTAssertEqual(event.type, MPEventType.media)
+                    XCTAssertEqual(event.messageType, MPMessageType.event)
                     mpEventHandler(event)
                     self._coreMPEventExpectation?.fulfill()
                 }
