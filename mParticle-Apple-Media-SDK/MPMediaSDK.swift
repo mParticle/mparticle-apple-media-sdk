@@ -466,7 +466,6 @@ let PlayerOvp = "player_ovp"
     /// Logs that a sequence of one or more ads has begun
     @objc public func logAdBreakStart(adBreak: MPMediaAdBreak, options: Options?  = nil) {
         self.adBreak = adBreak
-        self.adBreak?.duration = duration
         let mediaEvent = self.makeMediaEvent(name: .adBreakStart, options: options)
         mediaEvent.adBreak = self.adBreak
         self.logEvent(mediaEvent: mediaEvent)

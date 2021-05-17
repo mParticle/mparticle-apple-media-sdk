@@ -336,9 +336,11 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
 
     func testLogAdBreakStart() {
         let adBreak = MPMediaAdBreak(title: "foo adbreak title", id: "12345")
+        adBreak.duration = 50
         let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .adBreakStart)
             XCTAssertEqual(event.adBreak, adBreak)
+            XCTAssertEqual(event.adBreak?.duration, 50)
         }
         self.mediaEventHandler = mediaHandler
         self.coreMediaEventHandler = mediaHandler
