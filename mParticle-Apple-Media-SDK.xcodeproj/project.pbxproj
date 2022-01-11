@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B2F9AC482613949600926C7C /* mParticle_Apple_SDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DBC7002A2319AAF900981B75 /* mParticle_Apple_SDK.framework */; };
-		DB7CA49E23205CD900F1C47B /* mParticle_Apple_SDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DBC7002A2319AAF900981B75 /* mParticle_Apple_SDK.framework */; };
+		53522078278E1AD100684F0B /* mParticle_Apple_SDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53522077278E1AD100684F0B /* mParticle_Apple_SDK.framework */; };
+		53522079278E1AD100684F0B /* mParticle_Apple_SDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53522077278E1AD100684F0B /* mParticle_Apple_SDK.framework */; };
 		DBD815F22319A7F500A9809C /* mParticle_Apple_Media_SDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DBD815E82319A7F400A9809C /* mParticle_Apple_Media_SDK.framework */; };
 		DBD815F72319A7F500A9809C /* mParticle_Apple_MediaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD815F62319A7F500A9809C /* mParticle_Apple_MediaTests.swift */; };
 		DBD815F92319A7F500A9809C /* mParticle_Apple_Media_SDK.h in Headers */ = {isa = PBXBuildFile; fileRef = DBD815EB2319A7F400A9809C /* mParticle_Apple_Media_SDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -26,7 +26,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		DBC7002A2319AAF900981B75 /* mParticle_Apple_SDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = mParticle_Apple_SDK.framework; path = "/Users/wpassidomo/Documents/media-sdk-apple/Carthage/Build/iOS/mParticle_Apple_SDK.framework"; sourceTree = "<absolute>"; };
+		53522077278E1AD100684F0B /* mParticle_Apple_SDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = mParticle_Apple_SDK.framework; path = Carthage/Build/iOS/mParticle_Apple_SDK.framework; sourceTree = "<group>"; };
 		DBD815E82319A7F400A9809C /* mParticle_Apple_Media_SDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = mParticle_Apple_Media_SDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DBD815EB2319A7F400A9809C /* mParticle_Apple_Media_SDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mParticle_Apple_Media_SDK.h; sourceTree = "<group>"; };
 		DBD815EC2319A7F400A9809C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -41,7 +41,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B2F9AC482613949600926C7C /* mParticle_Apple_SDK.framework in Frameworks */,
+				53522078278E1AD100684F0B /* mParticle_Apple_SDK.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -50,7 +50,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DBD815F22319A7F500A9809C /* mParticle_Apple_Media_SDK.framework in Frameworks */,
-				DB7CA49E23205CD900F1C47B /* mParticle_Apple_SDK.framework in Frameworks */,
+				53522079278E1AD100684F0B /* mParticle_Apple_SDK.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -67,7 +67,7 @@
 		DBD815DE2319A7F400A9809C = {
 			isa = PBXGroup;
 			children = (
-				DBC7002A2319AAF900981B75 /* mParticle_Apple_SDK.framework */,
+				53522077278E1AD100684F0B /* mParticle_Apple_SDK.framework */,
 				DBD815EA2319A7F400A9809C /* mParticle-Apple-Media-SDK */,
 				DBD815F52319A7F500A9809C /* mParticle-Apple-Media-SDKTests */,
 				DBD815E92319A7F400A9809C /* Products */,

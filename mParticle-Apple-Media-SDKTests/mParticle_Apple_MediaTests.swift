@@ -1,6 +1,8 @@
 import XCTest
 @testable import mParticle_Apple_Media_SDK
 
+private let defaultTimeout = 10.0
+
 class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
     var coreSDK: MParticle?
     var mediaSession: MPMediaSession?
@@ -121,8 +123,17 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         XCTAssertEqual(mediaEvent2?.duration?.intValue, 80000)
         XCTAssertEqual(mediaEvent2?.contentType, .audio)
         XCTAssertEqual(mediaEvent2?.streamType, .liveStream)
+         
+        let customName = "some custom name"
+        let customMediaEvent = MPMediaEvent(customName: customName, session: mediaSession!, options: nil)
+        let customMPEvent = customMediaEvent?.toMPEvent()
+        
+        XCTAssertEqual(customMediaEvent?.customEventName, customName)
+        XCTAssertEqual(customMediaEvent?.mediaEventName, .custom)
+        XCTAssertEqual(customMPEvent?.name, customName)
+        XCTAssertEqual(customMPEvent?.type, .media)
     }
-
+    
     func testLogMediaSessionStart() {
         let mediaHandler = { (event: MPMediaEvent) -> Void in
             XCTAssertEqual(event.mediaEventName, .sessionStart)
@@ -131,7 +142,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
 
         mediaSession?.logMediaSessionStart()
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
     func testLogMediaSessionStartWithOptions() {
@@ -152,7 +163,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logMediaSessionStart(options: option)
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
     func testLogMediaSessionStartAlternet() {
@@ -167,7 +178,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         }
         
         mediaSession?.logMediaSessionStart()
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testLogMediaSessionEnd() {
@@ -178,7 +189,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logMediaSessionEnd()
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testLogMediaContentEnd() {
@@ -189,7 +200,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logMediaContentEnd()
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testLogPlay() {
@@ -200,7 +211,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logPlay()
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
     func testLogPlayWithExistingPlayhead() {
@@ -213,7 +224,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         
         mediaSession?.currentPlayheadPosition = 1400
         mediaSession?.logPlay()
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
     func testLogPlayWithOptions() {
@@ -230,7 +241,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logPlay(options: options)
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testLogPause() {
@@ -241,7 +252,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logPause()
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
     
     func testLogPauseWithOptions() {
@@ -258,7 +269,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logPause(options: options)
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testLogSeekStart() {
@@ -270,7 +281,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logSeekStart(position: 20000)
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testLogSeekEnd() {
@@ -282,7 +293,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logSeekEnd(position: 30000)
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testLogAdStart() {
@@ -298,7 +309,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logAdStart(adContent: adContent)
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testLogAdEnd() {
@@ -309,7 +320,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logAdEnd()
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testLogAdClick() {
@@ -320,7 +331,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logAdClick()
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testLogAdSkip() {
@@ -331,7 +342,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logAdSkip()
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testLogAdBreakStart() {
@@ -346,7 +357,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logAdBreakStart(adBreak: adBreak)
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testLogAdBreakEnd() {
@@ -357,7 +368,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logAdBreakEnd()
-        self.await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testLogSegmentStart() {
@@ -371,7 +382,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logSegmentStart(segment: segment)
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testLogSegmentEnd() {
@@ -382,7 +393,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logSegmentEnd()
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testLogSegmentSkip() {
@@ -393,7 +404,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logSegmentSkip()
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testLogPlayheadPosition() {
@@ -405,7 +416,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.coreMediaEventHandler = mediaHandler
         
         mediaSession?.logPlayheadPosition(position: 45000)
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func testLogQoS() {
@@ -425,7 +436,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         qos.fps = 60
         qos.startupTime = 2000
         mediaSession?.logQoS(metadata: qos)
-        await()
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 
     func onAPICalled(_: String, stackTrace: [Any], isExternal: Bool, objects: [Any]?) {
@@ -452,9 +463,5 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
                 eventHandler(first)
             }
         }
-    }
-    
-    private func await() {
-        self.waitForExpectations(timeout: 10, handler: nil)
     }
 }
