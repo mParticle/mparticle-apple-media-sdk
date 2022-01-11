@@ -688,6 +688,7 @@ let PlayerOvp = "player_ovp"
 
     // MARK: specialized
     // Properties only applicable to certain kinds of events
+    @objc public var customEventName: String?
     @objc public var adContent: MPMediaAdContent?
     @objc public var segment: MPMediaSegment?
     @objc public var adBreak: MPMediaAdBreak?
@@ -724,6 +725,11 @@ let PlayerOvp = "player_ovp"
         }
     }
     
+    @objc public convenience init?(customName: String, session: MPMediaSession, options: Options? = nil) {
+        self.init(name: MPMediaEventName.custom, session: session, options: options)
+        self.customEventName = customName
+    }
+    
     internal init?(name: MPMediaEventName, title: String, mediaContentId: String, duration: NSNumber?, contentType: MPMediaContentType, streamType: MPMediaStreamType, mediaSessionId: String, options: Options) {
         self.mediaEventName = name
         self.mediaContentTitle = title
@@ -742,6 +748,7 @@ let PlayerOvp = "player_ovp"
     @objc public override func isEqual(_ object: Any?) -> Bool {
         if let object = object as? MPMediaEvent {
             return (self.mediaEventName == object.mediaEventName &&
+                self.customEventName == object.customEventName &&
                 self.mediaContentTitle == object.mediaContentTitle &&
                 self.mediaContentId == object.mediaContentId &&
                 self.duration == object.duration &&
@@ -769,6 +776,7 @@ let PlayerOvp = "player_ovp"
         
         let object: MPMediaEvent? = MPMediaEvent(name: self.mediaEventName, title: self.mediaContentTitle, mediaContentId: mediaContentId, duration: duration, contentType: contentType, streamType: streamType, mediaSessionId: mediaSessionId, options: options)
         if let object = object {
+            object.customEventName = self.customEventName
             object.adContent = self.adContent
             object.segment = self.segment
             object.adBreak = self.adBreak
@@ -785,9 +793,14 @@ let PlayerOvp = "player_ovp"
     }
 
     @objc public func toMPEvent() -> MPEvent {
-        let eventNameString = MPMediaEvent.mediaEventTypeString(mediaEventType: self.mediaEventName)
-        let mpEvent = MPEvent.init(name: eventNameString, type: .media)
-        mpEvent?.customAttributes = self.getEventAttributes()
+        let eventNameString: String
+        if let customEventName = customEventName, mediaEventName == .custom {
+            eventNameString = customEventName
+        } else {
+            eventNameString = MPMediaEvent.mediaEventTypeString(mediaEventType: mediaEventName)
+        }
+        let mpEvent = MPEvent(name: eventNameString, type: .media)
+        mpEvent?.customAttributes = getEventAttributes()
                 
         return mpEvent!
     }
@@ -936,6 +949,7 @@ let PlayerOvp = "player_ovp"
 /// The type of a media event--this is set internally by the Media SDK on media event objects before forwarding to the core SDK.
 /// (You generally won't need this unless you need to call logBaseEvent for some reason.)
 @objc public enum MPMediaEventName: Int, RawRepresentable {
+    
     case play = 23
     case pause = 24
     case contentEnd = 25
@@ -959,6 +973,7 @@ let PlayerOvp = "player_ovp"
     case milestone = 47
     case sessionSummary = 48
     case adSessionSummary = 49
+    case custom = 50
 }
 
 public enum MPMediaEventNameString: String, RawRepresentable {
