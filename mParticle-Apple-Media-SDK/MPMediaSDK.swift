@@ -65,7 +65,6 @@ let MPSegmentSummary = "Media Segment Summary"
 let MPAdSummary = "Media Ad Summary"
 
 // Session Summary Attributes
-let mediaSessionIdKey = "media_session_id"
 let startTimestampKey = "media_session_start_time"
 let endTimestampKey = "media_session_end_time"
 let contentIdKey = "content_id"
@@ -233,6 +232,7 @@ let PlayerOvp = "player_ovp"
     @objc public let logMPEvents: Bool
     @objc public let logMediaEvents: Bool
     @objc public let mediaSessionId: String
+    @objc public var mediaSessionAttributes: [String:Any]
     @objc public var adContent: MPMediaAdContent?
     @objc public var adBreak: MPMediaAdBreak?
     @objc public var segment: MPMediaSegment?
@@ -293,6 +293,7 @@ let PlayerOvp = "player_ovp"
         self.contentType = contentType
         self.streamType = streamType
         self.mediaSessionId = NSUUID().uuidString
+        self.mediaSessionAttributes = [:]
         self.logMPEvents = false
         self.logMediaEvents = true
         
@@ -326,6 +327,7 @@ let PlayerOvp = "player_ovp"
         self.contentType = contentType
         self.streamType = streamType
         self.mediaSessionId = NSUUID().uuidString
+        self.mediaSessionAttributes = [:]
         self.logMPEvents = logMPEvents
         self.logMediaEvents = logMediaEvents
         if ( 100 >= completeLimit && completeLimit > 0) {
@@ -592,9 +594,9 @@ let PlayerOvp = "player_ovp"
     private func logSessionSummary() {
         if (!self.sessionSummarySent) {
             let event = MPEvent.init(name: MPSessionSummary, type: .media)!
+            let mediaEvent = self.makeMediaEvent(name: .sessionSummary, options: nil)
             
-            var customAttributes: [String:Any] = [:]
-            customAttributes[mediaSessionIdKey] = self.mediaSessionId
+            var customAttributes: [String:Any] = mediaEvent.getEventAttributes()
             customAttributes[startTimestampKey] = self.mediaSessionStartTimestamp
             customAttributes[endTimestampKey] = self.mediaSessionEndTimestamp
             customAttributes[contentIdKey] = self.mediaContentId
@@ -622,9 +624,9 @@ let PlayerOvp = "player_ovp"
             }
             
             let event = MPEvent.init(name: MPSegmentSummary, type: .media)!
+            let mediaEvent = self.makeMediaEvent(name: .segmentEnd, options: nil)
             
-            var customAttributes: [String:Any] = [:]
-            customAttributes[mediaSessionIdKey] = self.mediaSessionId
+            var customAttributes: [String:Any] = mediaEvent.getEventAttributes()
             customAttributes[contentIdKey] = self.mediaContentId
             customAttributes[segmentIndexKey] = self.segment?.index
             customAttributes[segmentTitleKey] = self.segment?.title
@@ -649,9 +651,9 @@ let PlayerOvp = "player_ovp"
             }
             
             let event = MPEvent.init(name: MPAdSummary, type: .media)!
+            let mediaEvent = self.makeMediaEvent(name: .adSessionSummary, options: nil)
             
-            var customAttributes: [String:Any] = [:]
-            customAttributes[mediaSessionIdKey] = self.mediaSessionId
+            var customAttributes: [String:Any] = mediaEvent.getEventAttributes()
             customAttributes[adBreakIdKey] = self.adBreak?.id
             customAttributes[adContentIdKey] = self.adContent?.id
             customAttributes[adContentStartTimestampKey] = self.adContent?.adStartTimestamp
@@ -716,7 +718,7 @@ let PlayerOvp = "player_ovp"
         super.init(eventType: .media)
         self.messageType = MPMessageType.media
         
-        self.customAttributes = options?.customAttributes
+        self.customAttributes = session.mediaSessionAttributes.merging(options?.customAttributes ?? [:]) { (_, new) in new }
         if (options?.currentPlayheadPosition != nil) {
             self.playheadPosition = options?.currentPlayheadPosition
             session.currentPlayheadPosition = options?.currentPlayheadPosition
@@ -806,7 +808,7 @@ let PlayerOvp = "player_ovp"
     }
     
     @objc func getSessionAttributes() -> Dictionary<String, Any> {
-        var sessionAttributes = Dictionary<String, String>()
+        var sessionAttributes = self.customAttributes ?? [:]
         sessionAttributes[MediaAttributeKeysMediaSessionId] = mediaSessionId
         sessionAttributes[MediaAttributeKeysPlayheadPosition] = playheadPosition?.stringValue
         sessionAttributes[MediaAttributeKeysTitle] = mediaContentTitle

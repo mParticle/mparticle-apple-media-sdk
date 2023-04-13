@@ -95,6 +95,8 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         XCTAssertEqual(mediaSession?.duration?.intValue, 90000)
         XCTAssertEqual(mediaSession?.contentType, .video)
         XCTAssertEqual(mediaSession?.streamType, .onDemand)
+        XCTAssertTrue(mediaSession?.mediaSessionAttributes != nil)
+        XCTAssertTrue(mediaSession?.mediaSessionAttributes.count == 0)
         
         let mediaEvent1 = mediaSession?.makeMediaEvent(name: .play)
         
@@ -104,8 +106,10 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         XCTAssertEqual(mediaEvent1?.duration?.intValue, 90000)
         XCTAssertEqual(mediaEvent1?.contentType, .video)
         XCTAssertEqual(mediaEvent1?.streamType, .onDemand)
+        XCTAssertTrue(mediaEvent1?.customAttributes == nil)
 
         mediaSession = MPMediaSession(coreSDK: coreSDK, mediaContentId: "678", title: "foo title 2", duration: 80000, contentType: .audio, streamType: .liveStream, logMPEvents: true, logMediaEvents: false, completeLimit: 90, testing: true)
+        mediaSession?.mediaSessionAttributes = ["exampleKey1": "exampleValue1"]
 
         XCTAssertTrue(mediaSession!.logMPEvents, "logMPEvents should have been set to true")
         XCTAssertFalse(mediaSession!.logMediaEvents, "logMediaEvent should have been set to false")
@@ -114,6 +118,8 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         XCTAssertEqual(mediaSession?.duration?.intValue, 80000)
         XCTAssertEqual(mediaSession?.contentType, .audio)
         XCTAssertEqual(mediaSession?.streamType, .liveStream)
+        XCTAssertEqual(mediaSession?.mediaSessionAttributes["exampleKey1"] as! String, "exampleValue1")
+        XCTAssertTrue(mediaSession?.mediaSessionAttributes.count == 1)
         
         let mediaEvent2 = mediaSession?.makeMediaEvent(name: .play)
         
@@ -123,15 +129,25 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         XCTAssertEqual(mediaEvent2?.duration?.intValue, 80000)
         XCTAssertEqual(mediaEvent2?.contentType, .audio)
         XCTAssertEqual(mediaEvent2?.streamType, .liveStream)
+        XCTAssertTrue(mediaEvent2?.customAttributes != nil)
+        XCTAssertEqual(mediaEvent2?.customAttributes?["exampleKey1"] as! String, "exampleValue1")
+        XCTAssertTrue(mediaEvent2?.customAttributes?.count == 1)
          
         let customName = "some custom name"
         let customMediaEvent = MPMediaEvent(customName: customName, session: mediaSession!, options: nil)
+        customMediaEvent?.customAttributes?["exampleKey2"] = "exampleValue2"
         let customMPEvent = customMediaEvent?.toMPEvent()
         
         XCTAssertEqual(customMediaEvent?.customEventName, customName)
         XCTAssertEqual(customMediaEvent?.mediaEventName, .custom)
+        XCTAssertTrue(customMediaEvent?.customAttributes != nil)
+        XCTAssertEqual(customMediaEvent?.customAttributes?["exampleKey1"] as! String, "exampleValue1")
+        XCTAssertEqual(customMediaEvent?.customAttributes?["exampleKey2"] as! String, "exampleValue2")
+        XCTAssertTrue(customMediaEvent?.customAttributes?.count == 2)
         XCTAssertEqual(customMPEvent?.name, customName)
         XCTAssertEqual(customMPEvent?.type, .media)
+        XCTAssertEqual(customMPEvent?.customAttributes?["exampleKey1"] as! String, "exampleValue1")
+        XCTAssertEqual(customMPEvent?.customAttributes?["exampleKey2"] as! String, "exampleValue2")
     }
     
     func testLogMediaSessionStart() {
@@ -162,6 +178,29 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         self.mediaEventHandler = mediaHandler
         self.coreMediaEventHandler = mediaHandler
         
+        mediaSession?.logMediaSessionStart(options: option)
+        self.waitForExpectations(timeout: defaultTimeout, handler: nil)
+    }
+    
+    func testLogMediaSessionStartWithOptionsAndCustomSessionAttributes() {
+        let option = Options();
+        let customAtt = [
+            "testKey1": "testValue1"
+        ]
+        option.customAttributes = customAtt
+        option.currentPlayheadPosition = 6000;
+        
+        let mediaHandler = { (event: MPMediaEvent) -> Void in
+            XCTAssertEqual(event.mediaEventName, .sessionStart)
+            XCTAssertEqual((event.customAttributes?["testKey1"] as? String), customAtt["testKey1"])
+            XCTAssertEqual((event.customAttributes?["testKey2"] as? String), "testValue2")
+            XCTAssertEqual(event.playheadPosition, 6000)
+            
+        }
+        self.mediaEventHandler = mediaHandler
+        self.coreMediaEventHandler = mediaHandler
+        
+        mediaSession?.mediaSessionAttributes = ["testKey2": "testValue2"]
         mediaSession?.logMediaSessionStart(options: option)
         self.waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
