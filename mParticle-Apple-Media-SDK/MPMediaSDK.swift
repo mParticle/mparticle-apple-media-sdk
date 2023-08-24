@@ -364,7 +364,7 @@ let PlayerOvp = "player_ovp"
     @objc func logEvent(mediaEvent: MPMediaEvent) {
         self.mediaSessionEndTimestamp = Date()
         if (self.mediaContentCompleteLimit != 100) {
-            if ((duration != nil) && (self.currentPlayheadPosition?.intValue ?? 0)/duration!.intValue > (self.mediaContentCompleteLimit/100)) {
+            if ((duration != nil) && (duration!.intValue != 0) && (self.currentPlayheadPosition?.intValue ?? 0)/duration!.intValue > (self.mediaContentCompleteLimit/100)) {
                 self.mediaContentComplete = true
             }
         }

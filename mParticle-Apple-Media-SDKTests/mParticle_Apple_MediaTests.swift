@@ -503,4 +503,32 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
             }
         }
     }
+    
+    func testEmptyDuration() {
+        XCTAssertNotNil(mediaSession)
+        
+        mediaSession?.duration = 0;
+        let mediaEvent1 = mediaSession?.makeMediaEvent(name: .play)
+        mediaSession?.logEvent(mediaEvent: mediaEvent1!)
+        
+        XCTAssertEqual(mediaEvent1?.mediaEventName, .play)
+        XCTAssertEqual(mediaEvent1?.mediaContentId, "12345")
+        XCTAssertEqual(mediaEvent1?.mediaContentTitle, "foo title")
+        XCTAssertEqual(mediaEvent1?.duration?.intValue, 0)
+        XCTAssertEqual(mediaEvent1?.contentType, .video)
+        XCTAssertEqual(mediaEvent1?.streamType, .onDemand)
+        XCTAssertTrue(mediaEvent1?.customAttributes == nil)
+
+        mediaSession?.duration = nil;
+        let mediaEvent2 = mediaSession?.makeMediaEvent(name: .play)
+        mediaSession?.logEvent(mediaEvent: mediaEvent2!)
+
+        XCTAssertEqual(mediaEvent1?.mediaEventName, .play)
+        XCTAssertEqual(mediaEvent1?.mediaContentId, "12345")
+        XCTAssertEqual(mediaEvent1?.mediaContentTitle, "foo title")
+        XCTAssertEqual(mediaEvent1?.duration?.intValue, 0)
+        XCTAssertEqual(mediaEvent1?.contentType, .video)
+        XCTAssertEqual(mediaEvent1?.streamType, .onDemand)
+        XCTAssertTrue(mediaEvent1?.customAttributes == nil)
+    }
 }
