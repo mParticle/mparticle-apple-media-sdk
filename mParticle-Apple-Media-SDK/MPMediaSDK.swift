@@ -238,11 +238,11 @@ let PlayerOvp = "player_ovp"
     @objc public var segment: MPMediaSegment?
     @objc public var mediaEventListener: ((MPMediaEvent)->Void)?
     
-    private var mediaSessionStartTimestamp: Date //Timestamp created on logMediaSessionStart event
-    private var mediaSessionEndTimestamp: Date //Timestamp updated when any event is loggged
+    private var mediaSessionStartTimestamp: Int //Timestamp created on logMediaSessionStart event
+    private var mediaSessionEndTimestamp: Int //Timestamp updated when any event is loggged
     private var mediaTimeSpent: Double {
         get { //total seconds between media session start and end time
-            return self.mediaSessionEndTimestamp.timeIntervalSince(mediaSessionStartTimestamp)
+            return Double((self.mediaSessionEndTimestamp - self.mediaSessionStartTimestamp) / 1000)
         }
     }
     private var mediaContentTimeSpent: Double {
@@ -297,7 +297,7 @@ let PlayerOvp = "player_ovp"
         self.logMPEvents = false
         self.logMediaEvents = true
         
-        let currentTimestamp = Date()
+        let currentTimestamp = Int(Date().timeIntervalSince1970 * 1000)
         self.mediaSessionStartTimestamp = currentTimestamp
         self.mediaSessionEndTimestamp = currentTimestamp
     }
@@ -334,7 +334,7 @@ let PlayerOvp = "player_ovp"
             self.mediaContentCompleteLimit = completeLimit
         }
         
-        let currentTimestamp = Date()
+        let currentTimestamp = Int(Date().timeIntervalSince1970 * 1000)
         self.mediaSessionStartTimestamp = currentTimestamp
         self.mediaSessionEndTimestamp = currentTimestamp
     }
@@ -362,7 +362,7 @@ let PlayerOvp = "player_ovp"
     
     /// Attempt to log the event with the Core SDK
     @objc func logEvent(mediaEvent: MPMediaEvent) {
-        self.mediaSessionEndTimestamp = Date()
+        self.mediaSessionEndTimestamp = Int(Date().timeIntervalSince1970 * 1000)
         if (self.mediaContentCompleteLimit != 100) {
             if ((duration != nil) && (self.currentPlayheadPosition?.intValue ?? 0)/duration!.intValue > (self.mediaContentCompleteLimit/100)) {
                 self.mediaContentComplete = true
@@ -386,7 +386,7 @@ let PlayerOvp = "player_ovp"
 
     /// Begins a media session
     @objc public func logMediaSessionStart(options: Options?  = nil) {
-        self.mediaSessionStartTimestamp = Date()
+        self.mediaSessionStartTimestamp = Int(Date().timeIntervalSince1970 * 1000)
         
         let mediaEvent = self.makeMediaEvent(name: .sessionStart, options: options)
         self.logEvent(mediaEvent: mediaEvent)
@@ -601,8 +601,8 @@ let PlayerOvp = "player_ovp"
             customAttributes[endTimestampKey] = self.mediaSessionEndTimestamp
             customAttributes[contentIdKey] = self.mediaContentId
             customAttributes[contentTitleKey] = self.title
-            customAttributes[mediaTimeSpentKey] = self.mediaTimeSpent
-            customAttributes[contentTimeSpentKey] = self.mediaContentTimeSpent
+            customAttributes[mediaTimeSpentKey] = round(self.mediaTimeSpent * 10) / 10
+            customAttributes[contentTimeSpentKey] = round(self.mediaContentTimeSpent * 10) / 10
             customAttributes[contentCompleteKey] = self.mediaContentComplete
             customAttributes[totalSegmentsKey] = self.mediaSessionSegmentTotal
             customAttributes[totalAdTimeSpentKey] = self.mediaTotalAdTimeSpent
