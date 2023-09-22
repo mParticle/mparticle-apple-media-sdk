@@ -238,14 +238,14 @@ let PlayerOvp = "player_ovp"
     @objc public var segment: MPMediaSegment?
     @objc public var mediaEventListener: ((MPMediaEvent)->Void)?
     
-    private var mediaSessionStartTimestamp: Date //Timestamp created on logMediaSessionStart event
-    private var mediaSessionEndTimestamp: Date //Timestamp updated when any event is loggged
-    private var mediaTimeSpent: Double {
+    private(set) public var mediaSessionStartTimestamp: Date //Timestamp created on logMediaSessionStart event
+    private(set) public var mediaSessionEndTimestamp: Date //Timestamp updated when any event is loggged
+    public var mediaTimeSpent: Double {
         get { //total seconds between media session start and end time
             return self.mediaSessionEndTimestamp.timeIntervalSince(mediaSessionStartTimestamp)
         }
     }
-    private var mediaContentTimeSpent: Double {
+    public var mediaContentTimeSpent: Double {
         get { //total seconds spent playing content
             if (self.currentPlaybackStartTimestamp != nil) {
                 return self.storedPlaybackTime + Date().timeIntervalSince(self.currentPlaybackStartTimestamp!)
@@ -254,20 +254,20 @@ let PlayerOvp = "player_ovp"
             }
         }
     }
-    private var mediaContentCompleteLimit: Int = 100
-    private var mediaContentComplete: Bool = false //Updates to true triggered by logMediaContentEnd (or if 90% or 95% of the content played), 0 or false if complete milestone not reached or a forced quit.
-    private var mediaSessionSegmentTotal: Int = 0 //number incremented with each logSegmentStart
-    private var mediaTotalAdTimeSpent: Double = 0 //total second sum of ad break time spent
-    private var mediaAdTimeSpentRate: Double {
+    private(set) public var mediaContentCompleteLimit: Int = 100
+    private(set) public var mediaContentComplete: Bool = false //Updates to true triggered by logMediaContentEnd (or if 90% or 95% of the content played), 0 or false if complete milestone not reached or a forced quit.
+    private(set) public var mediaSessionSegmentTotal: Int = 0 //number incremented with each logSegmentStart
+    private(set) public var mediaTotalAdTimeSpent: Double = 0 //total second sum of ad break time spent
+    public var mediaAdTimeSpentRate: Double {
         get { //ad time spent / content time spent x 100
             return self.mediaTotalAdTimeSpent/self.mediaContentTimeSpent*100
         }
     }
-    private var mediaSessionAdTotal: Int = 0 //number of ads played in the media session - increment on logAdStart
-    private var mediaSessionAdObjects: [String] = [] //array of unique identifiers for ads played in the media session - append ad_content_ID on logAdStart
+    private(set) public var mediaSessionAdTotal: Int = 0 //number of ads played in the media session - increment on logAdStart
+    private(set) public var mediaSessionAdObjects: [String] = [] //array of unique identifiers for ads played in the media session - append ad_content_ID on logAdStart
     
-    private var currentPlaybackStartTimestamp: Date? //Timestamp for beginning of current playback
-    private var storedPlaybackTime: Double = 0 //On Pause calculate playback time and clear currentPlaybackTime
+    private(set) public var currentPlaybackStartTimestamp: Date? //Timestamp for beginning of current playback
+    private(set) public var storedPlaybackTime: Double = 0 //On Pause calculate playback time and clear currentPlaybackTime
     private var sessionSummarySent = false // Ensures we only send summary event once
     
 
