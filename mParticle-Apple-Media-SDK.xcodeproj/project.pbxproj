@@ -3,12 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		53522078278E1AD100684F0B /* mParticle_Apple_SDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53522077278E1AD100684F0B /* mParticle_Apple_SDK.framework */; };
-		53522079278E1AD100684F0B /* mParticle_Apple_SDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53522077278E1AD100684F0B /* mParticle_Apple_SDK.framework */; };
+		53034BFE2BEC056C00AA62CE /* mParticle_Apple_SDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53034BFD2BEC056C00AA62CE /* mParticle_Apple_SDK.xcframework */; };
+		53034BFF2BEC056C00AA62CE /* mParticle_Apple_SDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53034BFD2BEC056C00AA62CE /* mParticle_Apple_SDK.xcframework */; };
 		DBD815F22319A7F500A9809C /* mParticle_Apple_Media_SDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DBD815E82319A7F400A9809C /* mParticle_Apple_Media_SDK.framework */; };
 		DBD815F72319A7F500A9809C /* mParticle_Apple_MediaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD815F62319A7F500A9809C /* mParticle_Apple_MediaTests.swift */; };
 		DBD815F92319A7F500A9809C /* mParticle_Apple_Media_SDK.h in Headers */ = {isa = PBXBuildFile; fileRef = DBD815EB2319A7F400A9809C /* mParticle_Apple_Media_SDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -26,7 +26,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		53522077278E1AD100684F0B /* mParticle_Apple_SDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = mParticle_Apple_SDK.framework; path = Carthage/Build/iOS/mParticle_Apple_SDK.framework; sourceTree = "<group>"; };
+		53034BFD2BEC056C00AA62CE /* mParticle_Apple_SDK.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:DLD43Y3TRP:mParticle, inc"; lastKnownFileType = wrapper.xcframework; name = mParticle_Apple_SDK.xcframework; path = Carthage/Build/mParticle_Apple_SDK.xcframework; sourceTree = "<group>"; };
 		DBD815E82319A7F400A9809C /* mParticle_Apple_Media_SDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = mParticle_Apple_Media_SDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DBD815EB2319A7F400A9809C /* mParticle_Apple_Media_SDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mParticle_Apple_Media_SDK.h; sourceTree = "<group>"; };
 		DBD815EC2319A7F400A9809C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -41,7 +41,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				53522078278E1AD100684F0B /* mParticle_Apple_SDK.framework in Frameworks */,
+				53034BFE2BEC056C00AA62CE /* mParticle_Apple_SDK.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -50,7 +50,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DBD815F22319A7F500A9809C /* mParticle_Apple_Media_SDK.framework in Frameworks */,
-				53522079278E1AD100684F0B /* mParticle_Apple_SDK.framework in Frameworks */,
+				53034BFF2BEC056C00AA62CE /* mParticle_Apple_SDK.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -67,7 +67,7 @@
 		DBD815DE2319A7F400A9809C = {
 			isa = PBXGroup;
 			children = (
-				53522077278E1AD100684F0B /* mParticle_Apple_SDK.framework */,
+				53034BFD2BEC056C00AA62CE /* mParticle_Apple_SDK.xcframework */,
 				DBD815EA2319A7F400A9809C /* mParticle-Apple-Media-SDK */,
 				DBD815F52319A7F500A9809C /* mParticle-Apple-Media-SDKTests */,
 				DBD815E92319A7F400A9809C /* Products */,
