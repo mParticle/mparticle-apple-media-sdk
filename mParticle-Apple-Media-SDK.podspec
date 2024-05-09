@@ -18,5 +18,6 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = "9.0"
     s.tvos.deployment_target = "9.0"
     s.source_files      = 'mParticle-Apple-Media-SDK/*.{h,swift}'
-    s.dependency 'mParticle-Apple-SDK', '~> 8.0'
+    s.ios.resource_bundles  = { 'mParticle-Apple-Media-SDK-Privacy' => ['mParticle-Apple-Media-SDK/PrivacyInfo.xcprivacy'] }
+    s.dependency 'mParticle-Apple-SDK', '~> 8.22'
 end
