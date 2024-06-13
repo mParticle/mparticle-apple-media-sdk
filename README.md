@@ -49,6 +49,9 @@ let mediaSession = MPMediaSession.init(
     duration: 120000,                   // Duration in milliseconds
     contentType: .video,                // Content Type (Video or Audio)
     streamType: .onDemand)              // Stream Type (OnDemand, Live, etc.)
+    mediaSession.mediaSessionAttributes = [
+        "my_session_attribute": "My Session Attribute"
+    ] // Optional custom media session attributes
 
 
 mediaSession.logMediaSessionStart()
@@ -61,6 +64,22 @@ options.customAttributes = ["testKey": "testValue"]
 
 mediaSession.logPause(options: options)
 ```
+
+### Custom media session attributes
+
+You can create custom media session attributes when initializing a new media session by including the custom media session attributes object directly in `MPMediaSession.init`:
+
+```swift
+mediaSession.mediaSessionAttributes = [
+    "my_session_attribute": "My Session Attribute"
+]
+```
+
+Custom session attributes have the following limitations:
+
+* 100 key/value pairs per media session
+* Keys must be strings and cannot exceed 255 characters
+* Values may be strings, numbers, booleans, or dates, and cannot exceed 4096 characters
 
 # Contribution Guidelines
 
