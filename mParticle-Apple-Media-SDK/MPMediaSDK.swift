@@ -597,8 +597,8 @@ let PlayerOvp = "player_ovp"
             let mediaEvent = self.makeMediaEvent(name: .sessionSummary, options: nil)
             
             var customAttributes: [String:Any] = mediaEvent.getEventAttributes()
-            customAttributes[startTimestampKey] = self.mediaSessionStartTimestamp
-            customAttributes[endTimestampKey] = self.mediaSessionEndTimestamp
+            customAttributes[startTimestampKey] = Int(self.mediaSessionStartTimestamp.timeIntervalSince1970  * 1_000)
+            customAttributes[endTimestampKey] = Int(self.mediaSessionEndTimestamp.timeIntervalSince1970  * 1_000)
             customAttributes[contentIdKey] = self.mediaContentId
             customAttributes[contentTitleKey] = self.title
             customAttributes[mediaTimeSpentKey] = self.mediaTimeSpent
