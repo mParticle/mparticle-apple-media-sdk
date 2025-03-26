@@ -403,6 +403,8 @@ let PlayerOvp = "player_ovp"
     /// Denotes that the playhead position has reached the final position in the content
     @objc public func logMediaContentEnd(options: Options?  = nil) {
         self.mediaContentComplete = true
+        self.storedPlaybackTime = self.storedPlaybackTime + Date().timeIntervalSince(self.currentPlaybackStartTimestamp ?? Date())
+        self.currentPlaybackStartTimestamp = nil;
         
         let mediaEvent = self.makeMediaEvent(name: .contentEnd, options: options)
         self.logEvent(mediaEvent: mediaEvent)
