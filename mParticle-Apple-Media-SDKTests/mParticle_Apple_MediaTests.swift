@@ -531,4 +531,64 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         XCTAssertEqual(mediaEvent1?.streamType, .onDemand)
         XCTAssertTrue(mediaEvent1?.customAttributes == nil)
     }
+    
+    func testMediaTimeSpentWhenLogMediaContentEndCalled() {
+        XCTAssertNotNil(mediaSession)
+        
+        // logPlay is triggered to start media content time tracking.
+        mediaSession?.logPlay()
+        // 0.1s delay added to account for the time spent on media content.
+        Thread.sleep(forTimeInterval: 0.1)
+        mediaSession?.logMediaContentEnd()
+        // Another 0.1s delay added after logMediaContentEnd is triggered to
+        // account for time spent on media session (total = +0.2s).
+        Thread.sleep(forTimeInterval: 0.1)
+        mediaSession?.logMediaSessionEnd()
+
+        let mediaSessionContentTimeSpent = mediaSession?.mediaContentTimeSpent ?? 0.0
+        let mediaSessionTimeSpent = mediaSession?.mediaTimeSpent ?? 0.0
+        
+        XCTAssertNotEqual(mediaSessionContentTimeSpent, mediaSessionTimeSpent)
+        
+        // the mediaContentTimeSpent varies in value each test run by a millisecond or two (i,e value is could be 0.101s,
+        // 0.103s, 0.105s) and we can't determine the exact value, hence the greaterThanOrEqual and lessThanOrEqual tests.
+        XCTAssertGreaterThanOrEqual(mediaSessionContentTimeSpent, 0.1)
+        XCTAssertLessThanOrEqual(mediaSessionContentTimeSpent, 0.2)
+        
+        // the mediaTimeSpent varies in value each test run by a millisecond or two (i,e value is could be 0.201s,
+        // 0.203s, 0.205s and we can't determine the exact value, hence the greaterThanOrEqual and lessThanOrEqual tests.
+        XCTAssertGreaterThanOrEqual(mediaSessionTimeSpent, 0.2)
+        XCTAssertLessThanOrEqual(mediaSessionTimeSpent, 0.3)
+        
+    }
+    
+    func testMediaTimeSpentWhenLogPauseCalled() {
+        XCTAssertNotNil(mediaSession)
+        
+        // logPlay is triggered to start media content time tracking.
+        mediaSession?.logPlay()
+        // 0.1s delay added to account for the time spent on media content.
+        Thread.sleep(forTimeInterval: 0.1)
+        mediaSession?.logPause()
+        // Another 0.1s delay added after logPause is triggered to
+        // account for time spent on media session (total = +0.2s).
+        Thread.sleep(forTimeInterval: 0.1)
+        mediaSession?.logMediaSessionEnd()
+
+        let mediaSessionContentTimeSpent = mediaSession?.mediaContentTimeSpent ?? 0.0
+        let mediaSessionTimeSpent = mediaSession?.mediaTimeSpent ?? 0.0
+        
+        XCTAssertNotEqual(mediaSessionContentTimeSpent, mediaSessionTimeSpent)
+        
+        // the mediaContentTimeSpent varies in value each test run by a millisecond or two (i,e value is could be 0.101s,
+        // 0.103s, 0.105s) and we can't determine the exact value, hence the greaterThanOrEqual and lessThanOrEqual tests.
+        XCTAssertGreaterThanOrEqual(mediaSessionContentTimeSpent, 0.1)
+        XCTAssertLessThanOrEqual(mediaSessionContentTimeSpent, 0.2)
+        
+        // the mediaTimeSpent varies in value each test run by a millisecond or two (i,e value is could be 0.201s,
+        // 0.203s, 0.205s and we can't determine the exact value, hence the greaterThanOrEqual and lessThanOrEqual tests.
+        XCTAssertGreaterThanOrEqual(mediaSessionTimeSpent, 0.2)
+        XCTAssertLessThanOrEqual(mediaSessionTimeSpent, 0.3)
+        
+    }
 }
