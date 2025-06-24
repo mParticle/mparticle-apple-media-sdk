@@ -241,7 +241,7 @@ let PlayerOvp = "player_ovp"
     private(set) public var mediaSessionStartTimestamp: Date //Timestamp created on logMediaSessionStart event
     private(set) public var mediaSessionEndTimestamp: Date //Timestamp updated when any event is loggged
     public var mediaTimeSpent: Double {
-        get { //total seconds between media session start and end time
+        get { //total seconds between media session start and current timestamp
             return Date().timeIntervalSince(mediaSessionStartTimestamp)
         }
     }
