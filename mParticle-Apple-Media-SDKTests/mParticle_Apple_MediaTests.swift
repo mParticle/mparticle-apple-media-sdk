@@ -532,6 +532,26 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         XCTAssertTrue(mediaEvent1?.customAttributes == nil)
     }
     
+    func testMediaTimeSpent() {
+        XCTAssertNotNil(mediaSession)
+        
+        // logPlay is triggered to start media content time tracking.
+        mediaSession?.logPlay()
+        // 0.5s delay added to account for the time spent on media content.
+        Thread.sleep(forTimeInterval: 0.5)
+        mediaSession?.logPause()
+        // Another 0.5s delay added after logPause is triggered to
+        // account for time spent on media session (total = +1s).
+        Thread.sleep(forTimeInterval: 0.5)
+        
+        // mediaTimeSpent should be >= 1s event though the last media event logged was 0.5s ago
+        let mediaSessionTimeSpent = mediaSession?.mediaTimeSpent ?? 0.0
+        // the mediaTimeSpent varies in value each test run by a millisecond or two (i,e value is could be 1.001s,
+        // 1.003s, 1.005s and we can't determine the exact value, hence the greaterThanOrEqual and lessThanOrEqual tests.
+        XCTAssertGreaterThanOrEqual(mediaSessionTimeSpent, 1)
+        XCTAssertLessThanOrEqual(mediaSessionTimeSpent, 1.1)
+    }
+    
     func testMediaTimeSpentWhenLogMediaContentEndCalled() {
         XCTAssertNotNil(mediaSession)
         

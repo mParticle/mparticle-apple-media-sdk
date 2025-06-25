@@ -239,10 +239,10 @@ let PlayerOvp = "player_ovp"
     @objc public var mediaEventListener: ((MPMediaEvent)->Void)?
     
     private(set) public var mediaSessionStartTimestamp: Date //Timestamp created on logMediaSessionStart event
-    private(set) public var mediaSessionEndTimestamp: Date //Timestamp updated when any event is loggged
+    private(set) public var mediaSessionEndTimestamp: Date //Timestamp updated when any event is logged
     public var mediaTimeSpent: Double {
-        get { //total seconds between media session start and end time
-            return self.mediaSessionEndTimestamp.timeIntervalSince(mediaSessionStartTimestamp)
+        get { //total seconds between media session start and current timestamp
+            return Date().timeIntervalSince(mediaSessionStartTimestamp)
         }
     }
     public var mediaContentTimeSpent: Double {
