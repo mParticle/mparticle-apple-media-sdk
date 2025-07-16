@@ -1,5 +1,19 @@
 name: iOS SDK Release
 
+###############################################################################
+# Secrets quick-ref
+# ─ Org secrets ─
+# MP_SEMANTIC_RELEASE_BOT   – GitHub PAT used for git pushes & semantic-release
+# COCOAPODS_TRUNK_TOKEN     – Token for `pod trunk push`
+#
+# ─ Repo secrets ─
+# MP_IOS_SDK_S3_KEY         – AWS access-key ID for example-workspace bucket
+# MP_IOS_SDK_S3_SECRET      – AWS secret key for the same
+# MP_IOS_SDK_S3_REGION      – S3 Bucket region
+# MP_IOS_SIGNING_CERTIFICATE_P12  – Base64-encoded iOS distribution .p12
+# MP_IOS_SIGNING_CERTIFICATE_PASS – Passphrase for the .p12 & temp keychain
+###############################################################################
+
 on:
   workflow_dispatch:
     inputs:
