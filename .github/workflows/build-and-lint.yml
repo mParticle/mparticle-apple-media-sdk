@@ -37,7 +37,7 @@ jobs:
         run: ./Scripts/carthage.sh build --no-skip-current || true
 
       - name: Carthage archive
-        run: carthage archive mParticle_Apple_SDK && carthage archive mParticle_Apple_SDK_NoLocation
+        run: carthage archive mParticle_Apple_Media_SDK && carthage archive mParticle_Apple_Media_SDK_NoLocation
 
       - name: Verify carthage products
         run: ls 2>&1 | grep .framework.zip
@@ -53,4 +53,4 @@ jobs:
 
       - name: Run static analyzer
         run: |
-          bash -c '! (set -o pipefail && xcodebuild -project "mParticle-Apple-SDK.xcodeproj" -scheme "mParticle-Apple-SDK" -sdk iphonesimulator -configuration Debug -destination "platform=iOS Simulator,name=iPhone 14,OS=latest" clean analyze | grep -v "warning: The iOS Simulator deployment target" | grep -B3 "warning")'
+          bash -c '! (set -o pipefail && xcodebuild -project "mParticle-Apple-Media-SDK.xcodeproj" -scheme "mParticle-Apple-Media-SDK" -sdk iphonesimulator -configuration Debug -destination "platform=iOS Simulator,name=iPhone 14,OS=latest" clean analyze | grep -v "warning: The iOS Simulator deployment target" | grep -B3 "warning")'
