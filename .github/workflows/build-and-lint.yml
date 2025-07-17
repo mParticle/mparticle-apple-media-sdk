@@ -33,6 +33,19 @@ jobs:
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_16.4.app
 
+      - name: Read Carthage Version
+        run: |
+          CURRENT_XCODE_VERSION=$(xcodebuild -version | grep "Build version" | cut -d' ' -f3)
+          echo "CURRENT_XCODE_VERSION=$CURRENT_XCODE_VERSION" >> $GITHUB_ENV
+
+      - name: Read Xcode Version
+        run: |
+          CURRENT_XCODE_VERSION=$(xcodebuild -version | grep "Build version" | cut -d' ' -f3)
+          echo "CURRENT_XCODE_VERSION=$CURRENT_XCODE_VERSION" >> $GITHUB_ENV
+
+      - name: List Xcode Simulators
+        run: xcrun simctl list --json
+
       - name: Build with Carthage
         run: ./Scripts/carthage.sh build --no-skip-current || true
 
