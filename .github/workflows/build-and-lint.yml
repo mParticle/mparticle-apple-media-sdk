@@ -35,8 +35,8 @@ jobs:
 
       - name: Read Carthage Version
         run: |
-          CURRENT_XCODE_VERSION=$(xcodebuild -version | grep "Build version" | cut -d' ' -f3)
-          echo "CURRENT_XCODE_VERSION=$CURRENT_XCODE_VERSION" >> $GITHUB_ENV
+          CURRENT_CARTHAGE_VERSION=$(carthage version)
+          echo "CURRENT_CARTHAGE_VERSION=$CURRENT_CARTHAGE_VERSION" >> $GITHUB_ENV
 
       - name: Read Xcode Version
         run: |
