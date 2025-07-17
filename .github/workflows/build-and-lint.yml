@@ -43,8 +43,10 @@ jobs:
           CURRENT_XCODE_VERSION=$(xcodebuild -version | grep "Build version" | cut -d' ' -f3)
           echo "CURRENT_XCODE_VERSION=$CURRENT_XCODE_VERSION" >> $GITHUB_ENV
 
-      - name: List Xcode Simulators
-        run: xcrun simctl list --json
+      - name: Choose Simulator
+        run: |
+          SIMULATOR_NAME=$(xcrun simctl list --json | jq -r '.devices[] | select(.name | contains("iPhone 16")) | .name')
+          echo "SIMULATOR_NAME=$SIMULATOR_NAME" >> $GITHUB_ENV
 
       - name: Build with Carthage
         run: ./Scripts/carthage.sh build --no-skip-current || true
