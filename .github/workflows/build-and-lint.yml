@@ -43,20 +43,6 @@ jobs:
           CURRENT_XCODE_VERSION=$(xcodebuild -version | grep "Build version" | cut -d' ' -f3)
           echo "CURRENT_XCODE_VERSION=$CURRENT_XCODE_VERSION" >> $GITHUB_ENV
 
-      - name: Boot iPhone 16 Simulator (iOS 18.5)
-        run: |
-          RUNTIME_ID=$(
-            xcrun simctl list runtimes \
-              | awk -F '[()]' '/iOS 18\.5/ {print $2; exit}'
-          )
-          UDID=$(
-            xcrun simctl list devices "$RUNTIME_ID" --json \
-              | jq -r '.devices[][] | select(.name=="iPhone 16") | .udid'
-          )
-          xcrun simctl boot "$UDID" || true
-          echo "SIMULATOR_UDID=$UDID" >> $GITHUB_ENV
-          echo "Booted simulator $UDID on $RUNTIME_ID"
-
       - name: Build with Carthage
         run: ./Scripts/carthage.sh build --no-skip-current || true
 
