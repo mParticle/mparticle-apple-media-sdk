@@ -32,6 +32,10 @@ jobs:
 
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_16.4.app
+      
+      - name: Bootstrap Carthage dependencies
+        # ensure the mParticle_Apple_SDK.xcframework ends up in Carthage/Build
+        run: carthage bootstrap --platform iOS --cache-builds --use-xcframeworks
 
       - name: Build SDK tests
         run: |
