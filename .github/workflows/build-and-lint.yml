@@ -24,7 +24,7 @@ jobs:
       - name: Undo twitter change to podspec
         run: git checkout *.podspec
 
-  carthage-build:
+  xcode-build:
     runs-on: macOS-15
     steps:
       - name: Checkout
@@ -33,24 +33,14 @@ jobs:
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_16.4.app
 
-      - name: Read Carthage Version
+      - name: Build SDK tests
         run: |
-          CURRENT_CARTHAGE_VERSION=$(carthage version)
-          echo "CURRENT_CARTHAGE_VERSION=$CURRENT_CARTHAGE_VERSION" >> $GITHUB_ENV
-
-      - name: Read Xcode Version
-        run: |
-          CURRENT_XCODE_VERSION=$(xcodebuild -version | grep "Build version" | cut -d' ' -f3)
-          echo "CURRENT_XCODE_VERSION=$CURRENT_XCODE_VERSION" >> $GITHUB_ENV
-
-      - name: Build with Carthage
-        run: ./Scripts/carthage.sh build --no-skip-current || true
-
-      - name: Carthage archive
-        run: carthage archive mParticle_Apple_Media_SDK
-
-      - name: Verify carthage products
-        run: ls 2>&1 | grep .framework.zip
+          set -o pipefail
+          xcodebuild \
+            -project "mParticle-Apple-Media-SDK.xcodeproj" \
+            -scheme "SDKTests" \
+            -destination "generic/platform=iOS" \
+            clean build | xcpretty
 
   run-analyzer:
     runs-on: macOS-15
