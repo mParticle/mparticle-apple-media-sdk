@@ -379,6 +379,7 @@
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/Carthage/Build/iOS/mParticle_Apple_SDK.framework/Headers/**";
 				INFOPLIST_FILE = "mParticle-Apple-Media-SDK/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -413,6 +414,7 @@
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/Carthage/Build/iOS/mParticle_Apple_SDK.framework/Headers/**";
 				INFOPLIST_FILE = "mParticle-Apple-Media-SDK/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
