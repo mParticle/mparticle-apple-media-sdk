@@ -44,7 +44,7 @@ jobs:
           echo "CURRENT_XCODE_VERSION=$CURRENT_XCODE_VERSION" >> $GITHUB_ENV
 
       - name: Build with Carthage
-        run: ./Scripts/carthage.sh build --no-skip-current || true
+        run: ./Scripts/carthage.sh build --no-skip-current --verbose
 
       - name: Carthage archive
         run: carthage archive mParticle_Apple_Media_SDK
