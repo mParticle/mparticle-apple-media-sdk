@@ -37,7 +37,7 @@ jobs:
         # ensure the mParticle_Apple_SDK.xcframework ends up in Carthage/Build
         run: carthage bootstrap --platform iOS --cache-builds --use-xcframeworks
 
-      - name: Build SDK tests
+      - name: Build SDK
         run: |
           set -o pipefail
           xcodebuild \
