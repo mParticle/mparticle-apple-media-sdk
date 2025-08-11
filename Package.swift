@@ -19,14 +19,7 @@ let package = Package(
         .target(
             name: "mParticle-Apple-Media-SDK",
             dependencies: [
-                .product(
-                   name: "mParticle-Apple-SDK",
-                   package: "mParticle-Apple-SDK"
-               ),
-                .product(
-                   name: "mParticle-Apple-SDK-NoLocation",
-                   package: "mParticle-Apple-SDK"
-               ),
+                "mParticle-Apple-SDK"
             ],
             path: "mParticle-Apple-Media-SDK",
             exclude: ["Info.plist"],
