@@ -28,8 +28,9 @@ let package = Package(
                )
             ],
             path: "mParticle-Apple-Media-SDK",
-            exclude: ["Info.plist"],
-            resources: [.process("PrivacyInfo.xcprivacy")],
+            //exclude: ["Info.plist"],
+            sources: ["../mParticle-Apple-Media-SDK-Shared"],
+            resources: [.process("../mParticle-Apple-Media-SDK-Shared/PrivacyInfo.xcprivacy")],
             publicHeadersPath: "."
         ),
         .target(
@@ -40,9 +41,10 @@ let package = Package(
                    package: "mParticle-Apple-SDK"
                ),
             ],
-            path: "mParticle-Apple-Media-SDK-NoLocation",
-            exclude: ["Info.plist"],
-            resources: [.process("PrivacyInfo.xcprivacy")],
+            path: "mParticle-Apple-Media-SDK",
+            //exclude: ["Info.plist"],
+            sources: ["../mParticle-Apple-Media-SDK-Shared"],
+            resources: [.process("../mParticle-Apple-Media-SDK-Shared/PrivacyInfo.xcprivacy")],
             publicHeadersPath: "."
         )
     ]
