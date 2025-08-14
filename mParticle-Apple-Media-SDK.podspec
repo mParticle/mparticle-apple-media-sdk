@@ -18,24 +18,25 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = "9.0"
     s.tvos.deployment_target = "9.0"
     
+    # ---- mParticleMedia ----
     s.subspec 'mParticleMedia' do |ss|
-      # Include Shared + the sdk symlink contents
-      ss.source_files        = 'mParticle-Apple-Media-SDK-Shared/**/*.{h,m,swift}', 'mParticle-Apple-Media-SDK/**/*.{h,m,swift}'
-      # Only expose the Location umbrella as public
-      ss.public_header_files = 'mParticle-Apple-Media-SDK/mParticle_Apple_Media_SDK.h'
-      # Make sure we do NOT accidentally pull the NoLocation umbrella here
-      ss.exclude_files       = 'mParticle-Apple-Media-SDK-NoLocation/**/*'
-      ss.dependency 'mParticle-Apple-SDK/mParticle', '~> 8.22'
+        ss.source_files = [
+          'mParticle-Apple-Media-SDK-Shared/**/*.{h,m,mm,swift}',
+          'mParticle-Apple-Media-SDK/mParticle_Apple_Media_SDK.h'
+        ]
+        ss.public_header_files = 'mParticle-Apple-Media-SDK/mParticle_Apple_Media_SDK.h'
+        ss.dependency 'mParticle-Apple-SDK/mParticle', '~> 8.22'
     end
 
-    s.subspec 'mParticleMediaNoLocation' do |ss|
-      # Include Shared + the nolocation symlink contents
-      ss.source_files        = 'mParticle-Apple-Media-SDK-Shared/**/*.{h,m,swift}', 'mParticle-Apple-Media-SDK-NoLocation/**/*.{h,m,swift}'
-      # Only expose the NoLocation umbrella as public
-      ss.public_header_files = 'mParticle-Apple-Media-SDK-NoLocation/mParticle_Apple_Media_SDK_NoLocation.h'
-      # Make sure we do NOT accidentally pull the Location umbrella here
-      ss.exclude_files       = 'mParticle-Apple-Media-SDK/**/*'
-      ss.dependency 'mParticle-Apple-SDK/mParticleNoLocation', '~> 8.22'
+    # ---- NoLocation ----
+    s.subspec 'NoLocation' do |ss|
+        ss.source_files = [
+          'mParticle-Apple-Media-SDK-Shared/**/*.{h,m,mm,swift}',
+          'mParticle-Apple-Media-SDK/mParticle_Apple_Media_SDK_NoLocation.h'
+        ]
+        ss.public_header_files = 'mParticle-Apple-Media-SDK/mParticle_Apple_Media_SDK_NoLocation.h'
+        ss.dependency 'mParticle-Apple-SDK/mParticleNoLocation', '~> 8.22'
     end
-
+    
+    s.default_subspecs = "mParticleMedia"
 end
