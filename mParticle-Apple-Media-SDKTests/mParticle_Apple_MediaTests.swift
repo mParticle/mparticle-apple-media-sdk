@@ -148,6 +148,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         XCTAssertEqual(customMPEvent?.type, .media)
         XCTAssertEqual(customMPEvent?.customAttributes?["exampleKey1"] as! String, "exampleValue1")
         XCTAssertEqual(customMPEvent?.customAttributes?["exampleKey2"] as! String, "exampleValue2")
+        XCTAssertEqual(customMPEvent?.customAttributes?["content_type"] as! String, "audio")
     }
     
     func testLogMediaSessionStart() {
