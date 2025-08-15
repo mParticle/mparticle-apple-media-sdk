@@ -50,9 +50,3 @@ let package = Package(
         )
     ]
 )
-
-@import mParticle-Apple-Media-SDK-NoLocation
-#import <mParticle-Apple-Media-SDK-NoLocation/mParticle_Apple_Media_SDK.h>
-
-
-#import mParticle-Apple-Media-SDK-NoLocation
