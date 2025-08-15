@@ -30,11 +30,18 @@ Pod::Spec.new do |s|
 
     # ---- NoLocation ----
     s.subspec 'NoLocation' do |ss|
+        ss.pod_target_xcconfig = {
+            # ObjC/C/C++: makes MP_NO_LOCATION available to your headers/ObjC code
+            'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) MP_NO_LOCATION=1',
+            # Swift: lets you use `#if MP_NO_LOCATION` in Swift files
+            'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) MP_NO_LOCATION'
+        }
+
         ss.source_files = [
           'mParticle-Apple-Media-SDK-Shared/**/*.{h,m,mm,swift}',
           'mParticle-Apple-Media-SDK/mParticle_Apple_Media_SDK_NoLocation.h'
         ]
-        ss.public_header_files = 'mParticle-Apple-Media-SDK/mParticle_Apple_Media_SDK_NoLocation.h'
+        ss.public_header_files = 'mParticle-Apple-Media-SDK/mParticle_Apple_Media_SDK.h'
         ss.dependency 'mParticle-Apple-SDK/mParticleNoLocation', '~> 8.22'
     end
     

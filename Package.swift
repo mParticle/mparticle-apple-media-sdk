@@ -31,7 +31,7 @@ let package = Package(
             //exclude: ["Info.plist"],
             sources: ["../mParticle-Apple-Media-SDK-Shared"],
             resources: [.process("../mParticle-Apple-Media-SDK-Shared/PrivacyInfo.xcprivacy")],
-            publicHeadersPath: "."
+            publicHeadersPath: "./mParticle-Apple-Media-SDK"
         ),
         .target(
             name: "mParticle-Apple-Media-SDK-NoLocation",
@@ -45,7 +45,14 @@ let package = Package(
             //exclude: ["Info.plist"],
             sources: ["../mParticle-Apple-Media-SDK-Shared"],
             resources: [.process("../mParticle-Apple-Media-SDK-Shared/PrivacyInfo.xcprivacy")],
-            publicHeadersPath: "."
+            publicHeadersPath: "./mParticle-Apple-Media-SDK",
+            cSettings: [.define("MP_NO_LOCATION")]
         )
     ]
 )
+
+@import mParticle-Apple-Media-SDK-NoLocation
+#import <mParticle-Apple-Media-SDK-NoLocation/mParticle_Apple_Media_SDK.h>
+
+
+#import mParticle-Apple-Media-SDK-NoLocation
