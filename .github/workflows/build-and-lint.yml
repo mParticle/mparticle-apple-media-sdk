@@ -1,0 +1,60 @@
+name: iOS SDK Build and Lint
+
+on: [pull_request]
+
+jobs:
+  pod-lint:
+    runs-on: macOS-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app
+        
+      - name: Update xcodeproj gem
+        run: sudo gem install xcodeproj
+
+      - name: Prevent social URL warnings if twitter is unreachable
+        run: find . -path '*.podspec' -exec perl -pi -e 's/.+\.social_media_url.+//' {} \;
+
+      - name: Lint with CocoaPods
+        run: pod lib lint
+
+      - name: Undo twitter change to podspec
+        run: git checkout *.podspec
+
+  xcode-build: 
+    runs-on: macOS-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app
+      
+      - name: Bootstrap Carthage dependencies
+        # ensure the mParticle_Apple_SDK.xcframework ends up in Carthage/Build
+        run: carthage bootstrap --platform iOS --cache-builds --use-xcframeworks
+
+      - name: Build SDK
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project "mParticle-Apple-Media-SDK.xcodeproj" \
+            -scheme "mParticle-Apple-Media-SDK" \
+            -destination "generic/platform=iOS" \
+            clean build | xcpretty
+
+  run-analyzer:
+    runs-on: macOS-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app
+
+      - name: Run static analyzer
+        run: |
+          bash -c '! (set -o pipefail && xcodebuild -project "mParticle-Apple-Media-SDK.xcodeproj" -scheme "mParticle-Apple-Media-SDK" -sdk iphonesimulator -configuration Debug -destination "platform=iOS Simulator,name=iPhone 14,OS=latest" clean analyze | grep -v "warning: The iOS Simulator deployment target" | grep -B3 "warning")'

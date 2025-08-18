@@ -821,7 +821,7 @@ let PlayerOvp = "player_ovp"
         sessionAttributes[MediaAttributeKeysContentId] = mediaContentId
         sessionAttributes[MediaAttributeKeysDuration] = duration?.stringValue
         sessionAttributes[MediaAttributeKeysStreamType] = MPMediaEvent.mediaStreamTypeString(mediaStreamType:streamType);
-        sessionAttributes[MediaAttributeKeysContentType] = (contentType == MPMediaContentType.video) ? MPMediaContentTypeString.video.rawValue : MPMediaContentTypeString.video.rawValue
+        sessionAttributes[MediaAttributeKeysContentType] = (contentType == MPMediaContentType.video) ? MPMediaContentTypeString.video.rawValue : MPMediaContentTypeString.audio.rawValue
         
         return sessionAttributes
     }
