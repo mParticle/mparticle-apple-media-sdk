@@ -16,7 +16,7 @@ let package = Package(
     dependencies: [
         .package(name: "mParticle-Apple-SDK",
             url: "https://github.com/mParticle/mparticle-apple-sdk",
-            .upToNextMajor(from: "8.22.0")),
+            .upToNextMajor(from: "8.37.0")),
     ],
     targets: [
         .target(

@@ -28,7 +28,7 @@ Pod::Spec.new do |s|
         ]
         ss.public_header_files = 'mParticle-Apple-Media-SDK/mParticle_Apple_Media_SDK.h'
         
-        ss.dependency 'mParticle-Apple-SDK/mParticle', '~> 8.22'
+        ss.dependency 'mParticle-Apple-SDK/mParticle', '~> 8.37'
     end
 
     # ---- NoLocation ----
@@ -44,7 +44,7 @@ Pod::Spec.new do |s|
         ]
         ss.public_header_files = 'mParticle-Apple-Media-SDK/mParticle_Apple_Media_SDK.h'
         
-        ss.dependency 'mParticle-Apple-SDK/mParticleNoLocation', '~> 8.22'
+        ss.dependency 'mParticle-Apple-SDK/mParticleNoLocation', '~> 8.37'
     end
     
 end
