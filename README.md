@@ -16,8 +16,6 @@ Fully detailed documentation and other information about mParticle Apple SDK can
 
 Please be aware that this SDK is built as an extension of and requires the use of the [mParticle Apple SDK](https://github.com/mParticle/mparticle-apple-sdk/).
 
-Below summarizes the major steps to get the Apple Media SDK up and running. In addition to the below, we have built a sample app that provides a more in depth look at how to send Media Events to Adobe's Heartbeat Kit. See that [sample app here](https://github.com/mParticle/mparticle-media-samples)
-
 ## Get the SDK
 
 The mParticle-Apple-Media-SDK is available via [CocoaPods](https://cocoapods.org/?q=mparticle) or [Swift Package Manager](https://github.com/swiftlang/swift-package-manager). Follow the instructions below based on your preference.
@@ -48,6 +46,8 @@ Then choose either the "Package Product" called `mParticle-Apple-Media-SDK`, or 
 **IMPORTANT:** If you choose the `mParticle-Apple-Media-SDK-NoLocation` package product, you will need to import the SDK using `import mParticle_Apple_Media_SDK_NoLocation` instead of `import mParticle_Apple_Media_SDK` as shown in the rest of the documentation and this README. 
 
 ## Include and Initialize the SDK
+
+Below summarizes the major steps to get the Apple Media SDK up and running in a swift app. In addition to the below, we have built a sample app that provides a more in depth look at how to send Media Events to Adobe's Heartbeat Kit. See that [sample app here](https://github.com/mParticle/mparticle-media-samples)
 
 ```swift
 // AppDelegate.swift
@@ -80,6 +80,8 @@ mediaSession.logPause(options: options)
 ```
 
 #### Objective-C
+
+The following example demonstrates how to import and use the Apple Media SDK in an Objective-C project. It shows the correct module and header import statements depending on your build setup.
 
 For apps supporting iOS 8 and above, Apple recommends using the import syntax for **modules** or **semantic import**.
 
