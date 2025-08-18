@@ -1,2 +1,2 @@
-binary "https://raw.githubusercontent.com/mParticle/mparticle-apple-sdk/main/mParticle_Apple_SDK.json" ~> 8.22
+binary "https://raw.githubusercontent.com/mParticle/mparticle-apple-sdk/main/mParticle_Apple_SDK.json" ~> 8.37
 github "mParticle/mparticle-apple-media-sdk" ~> 1.0
