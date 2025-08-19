@@ -15,9 +15,32 @@ Pod::Spec.new do |s|
 
     s.swift_version = '5.0'
 
-    s.ios.deployment_target = "9.0"
-    s.tvos.deployment_target = "9.0"
-    s.source_files      = 'mParticle-Apple-Media-SDK/*.{h,swift}'
-    s.ios.resource_bundles  = { 'mParticle-Apple-Media-SDK-Privacy' => ['mParticle-Apple-Media-SDK/PrivacyInfo.xcprivacy'] }
-    s.dependency 'mParticle-Apple-SDK', '~> 8.22'
+    s.ios.deployment_target = "12.0"
+    s.tvos.deployment_target = "12.0"
+    
+    s.default_subspecs = "mParticleMedia"
+    
+    # ---- mParticleMedia ----
+    s.subspec 'mParticleMedia' do |ss|
+        ss.source_files = [
+          'mParticle-Apple-Media-SDK-Shared/**/*.{h,m,mm,swift}'
+        ]
+        
+        ss.dependency 'mParticle-Apple-SDK/mParticle', '~> 8.37'
+    end
+
+    # ---- NoLocation ----
+    s.subspec 'mParticleMediaNoLocation' do |ss|
+        ss.pod_target_xcconfig = {
+            'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) MP_NO_LOCATION=1',
+            'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) MP_NO_LOCATION'
+        }
+
+        ss.source_files = [
+          'mParticle-Apple-Media-SDK-Shared/**/*.{h,m,mm,swift}'
+        ]
+        
+        ss.dependency 'mParticle-Apple-SDK/mParticleNoLocation', '~> 8.37'
+    end
+    
 end
