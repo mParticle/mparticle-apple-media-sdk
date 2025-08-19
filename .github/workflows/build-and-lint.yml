@@ -42,6 +42,15 @@ jobs:
             -destination "generic/platform=iOS" \
             clean build | xcpretty
 
+      - name: Build SDK NoLocation
+        run: |
+          set -o pipefail
+          xcodebuild -resolvePackageDependencies \
+            -project "mParticle-Apple-Media-SDK.xcodeproj" \
+            -scheme "mParticle-Apple-Media-SDK-NoLocation" \
+            -destination "generic/platform=iOS" \
+            clean build | xcpretty
+
   run-analyzer:
     runs-on: macOS-15
     steps:
