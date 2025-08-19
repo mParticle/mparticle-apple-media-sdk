@@ -36,7 +36,7 @@ jobs:
       - name: Build SDK
         run: |
           set -o pipefail
-          xcodebuild \
+          xcodebuild -resolvePackageDependencies \
             -project "mParticle-Apple-Media-SDK.xcodeproj" \
             -scheme "mParticle-Apple-Media-SDK" \
             -destination "generic/platform=iOS" \

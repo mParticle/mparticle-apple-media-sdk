@@ -3,12 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		53034BFE2BEC056C00AA62CE /* mParticle_Apple_SDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53034BFD2BEC056C00AA62CE /* mParticle_Apple_SDK.xcframework */; };
-		53034BFF2BEC056C00AA62CE /* mParticle_Apple_SDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53034BFD2BEC056C00AA62CE /* mParticle_Apple_SDK.xcframework */; };
+		721599D52E550FDC0009AAD0 /* mParticle-Apple-SDK in Frameworks */ = {isa = PBXBuildFile; productRef = 721599D42E550FDC0009AAD0 /* mParticle-Apple-SDK */; };
 		DBD815F22319A7F500A9809C /* mParticle_Apple_Media_SDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DBD815E82319A7F400A9809C /* mParticle_Apple_Media_SDK.framework */; };
 		DBD815F72319A7F500A9809C /* mParticle_Apple_MediaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD815F62319A7F500A9809C /* mParticle_Apple_MediaTests.swift */; };
 		DBD815F92319A7F500A9809C /* mParticle_Apple_Media_SDK.h in Headers */ = {isa = PBXBuildFile; fileRef = DBD815EB2319A7F400A9809C /* mParticle_Apple_Media_SDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -26,7 +25,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		53034BFD2BEC056C00AA62CE /* mParticle_Apple_SDK.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:DLD43Y3TRP:mParticle, inc"; lastKnownFileType = wrapper.xcframework; name = mParticle_Apple_SDK.xcframework; path = Carthage/Build/mParticle_Apple_SDK.xcframework; sourceTree = "<group>"; };
 		DBD815E82319A7F400A9809C /* mParticle_Apple_Media_SDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = mParticle_Apple_Media_SDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DBD815EB2319A7F400A9809C /* mParticle_Apple_Media_SDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mParticle_Apple_Media_SDK.h; sourceTree = "<group>"; };
 		DBD815EC2319A7F400A9809C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -41,7 +39,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				53034BFE2BEC056C00AA62CE /* mParticle_Apple_SDK.xcframework in Frameworks */,
+				721599D52E550FDC0009AAD0 /* mParticle-Apple-SDK in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -50,7 +48,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				DBD815F22319A7F500A9809C /* mParticle_Apple_Media_SDK.framework in Frameworks */,
-				53034BFF2BEC056C00AA62CE /* mParticle_Apple_SDK.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -67,7 +64,6 @@
 		DBD815DE2319A7F400A9809C = {
 			isa = PBXGroup;
 			children = (
-				53034BFD2BEC056C00AA62CE /* mParticle_Apple_SDK.xcframework */,
 				DBD815EA2319A7F400A9809C /* mParticle-Apple-Media-SDK */,
 				DBD815F52319A7F500A9809C /* mParticle-Apple-Media-SDKTests */,
 				DBD815E92319A7F400A9809C /* Products */,
@@ -181,6 +177,9 @@
 				Base,
 			);
 			mainGroup = DBD815DE2319A7F400A9809C;
+			packageReferences = (
+				721599D32E550FDC0009AAD0 /* XCRemoteSwiftPackageReference "mparticle-apple-sdk" */,
+			);
 			productRefGroup = DBD815E92319A7F400A9809C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -510,6 +509,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		721599D32E550FDC0009AAD0 /* XCRemoteSwiftPackageReference "mparticle-apple-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mParticle/mparticle-apple-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.4.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		721599D42E550FDC0009AAD0 /* mParticle-Apple-SDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 721599D32E550FDC0009AAD0 /* XCRemoteSwiftPackageReference "mparticle-apple-sdk" */;
+			productName = "mParticle-Apple-SDK";
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DBD815DF2319A7F400A9809C /* Project object */;
 }
