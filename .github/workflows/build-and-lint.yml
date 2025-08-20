@@ -32,17 +32,22 @@ jobs:
 
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_16.4.app
-      
-      - name: Bootstrap Carthage dependencies
-        # ensure the mParticle_Apple_SDK.xcframework ends up in Carthage/Build
-        run: carthage bootstrap --platform iOS --cache-builds --use-xcframeworks
 
       - name: Build SDK
         run: |
           set -o pipefail
-          xcodebuild \
+          xcodebuild -resolvePackageDependencies \
             -project "mParticle-Apple-Media-SDK.xcodeproj" \
             -scheme "mParticle-Apple-Media-SDK" \
+            -destination "generic/platform=iOS" \
+            clean build | xcpretty
+
+      - name: Build SDK NoLocation
+        run: |
+          set -o pipefail
+          xcodebuild -resolvePackageDependencies \
+            -project "mParticle-Apple-Media-SDK.xcodeproj" \
+            -scheme "mParticle-Apple-Media-SDK-NoLocation" \
             -destination "generic/platform=iOS" \
             clean build | xcpretty
 
