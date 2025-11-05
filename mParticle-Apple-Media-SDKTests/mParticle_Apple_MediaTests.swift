@@ -79,7 +79,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         coreSDK = MParticle.sharedInstance()
-        mediaSession = MPMediaSession(coreSDK: coreSDK, mediaContentId: "12345", title: "foo title", duration: 90000, contentType: .video, streamType: .onDemand, logMPEvents: false, logMediaEvents: true, completeLimit: 90, testing: true)
+        mediaSession = MPMediaSession(coreSDK: coreSDK, mediaContentId: "12345", title: "foo title", duration: 90000, contentType: .video, streamType: .onDemand, logMPEvents: false, logMediaEvents: true, completeLimit: 90, excludeAdBreaksFromContentTime: true, testing: true)
         MPListenerController.sharedInstance().addSdkListener(self)
     }
 
@@ -102,6 +102,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         XCTAssertEqual(mediaSession?.streamType, .onDemand)
         XCTAssertTrue(mediaSession?.mediaSessionAttributes != nil)
         XCTAssertTrue(mediaSession?.mediaSessionAttributes.count == 0)
+        XCTAssertTrue(mediaSession!.excludeAdBreaksFromContentTime)
         
         let mediaEvent1 = mediaSession?.makeMediaEvent(name: .play)
         
@@ -113,7 +114,7 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         XCTAssertEqual(mediaEvent1?.streamType, .onDemand)
         XCTAssertTrue(mediaEvent1?.customAttributes == nil)
 
-        mediaSession = MPMediaSession(coreSDK: coreSDK, mediaContentId: "678", title: "foo title 2", duration: 80000, contentType: .audio, streamType: .liveStream, logMPEvents: true, logMediaEvents: false, completeLimit: 90, testing: true)
+        mediaSession = MPMediaSession(coreSDK: coreSDK, mediaContentId: "678", title: "foo title 2", duration: 80000, contentType: .audio, streamType: .liveStream, logMPEvents: true, logMediaEvents: false, completeLimit: 90, excludeAdBreaksFromContentTime: true, testing: true)
         mediaSession?.mediaSessionAttributes = ["exampleKey1": "exampleValue1"]
 
         XCTAssertTrue(mediaSession!.logMPEvents, "logMPEvents should have been set to true")
@@ -125,6 +126,8 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         XCTAssertEqual(mediaSession?.streamType, .liveStream)
         XCTAssertEqual(mediaSession?.mediaSessionAttributes["exampleKey1"] as! String, "exampleValue1")
         XCTAssertTrue(mediaSession?.mediaSessionAttributes.count == 1)
+        XCTAssertTrue(mediaSession!.excludeAdBreaksFromContentTime)
+        
         
         let mediaEvent2 = mediaSession?.makeMediaEvent(name: .play)
         
