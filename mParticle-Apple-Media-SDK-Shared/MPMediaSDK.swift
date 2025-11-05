@@ -550,7 +550,7 @@ let PlayerOvp = "player_ovp"
     // MARK: ad break
     /// Logs that a sequence of one or more ads has begun
     @objc public func logAdBreakStart(adBreak: MPMediaAdBreak, options: Options?  = nil) {
-        handleAdBreakStartState()
+        self.handleAdBreakStartState()
         
         self.adBreak = adBreak
         let mediaEvent = self.makeMediaEvent(name: .adBreakStart, options: options)
@@ -560,7 +560,7 @@ let PlayerOvp = "player_ovp"
 
     /// Indicates that the ad break is complete
     @objc public func logAdBreakEnd(options: Options?  = nil) {
-        handleAdBreakEndState()
+        self.handleAdBreakEndState()
         
         let mediaEvent = self.makeMediaEvent(name: .adBreakEnd, options: options)
         mediaEvent.adBreak = self.adBreak
@@ -571,21 +571,21 @@ let PlayerOvp = "player_ovp"
     // MARK: private helpers (ad break)
     /// Pause content time tracking if ad-break exclusion is enabled.
     private func handleAdBreakStartState() {
-        guard excludeAdBreaksFromContentTime,
-              currentPlaybackStartTimestamp != nil else { return }
+        guard self.excludeAdBreaksFromContentTime,
+              self.currentPlaybackStartTimestamp != nil else { return }
         
-        storedPlaybackTime += Date().timeIntervalSince(currentPlaybackStartTimestamp!)
-        currentPlaybackStartTimestamp = nil
-        pausedByAdBreak = true
+        self.storedPlaybackTime += Date().timeIntervalSince(self.currentPlaybackStartTimestamp ?? Date())
+        self.currentPlaybackStartTimestamp = nil
+        self.pausedByAdBreak = true
     }
 
     /// Resume content time tracking if previously paused due to ad break.
     private func handleAdBreakEndState() {
-        guard excludeAdBreaksFromContentTime,
-              pausedByAdBreak else { return }
+        guard self.excludeAdBreaksFromContentTime,
+              self.pausedByAdBreak else { return }
         
-        currentPlaybackStartTimestamp = Date()
-        pausedByAdBreak = false
+        self.currentPlaybackStartTimestamp = Date()
+        self.pausedByAdBreak = false
     }
 
     // MARK: ad content
