@@ -550,11 +550,7 @@ let PlayerOvp = "player_ovp"
     // MARK: ad break
     /// Logs that a sequence of one or more ads has begun
     @objc public func logAdBreakStart(adBreak: MPMediaAdBreak, options: Options?  = nil) {
-        if excludeAdBreaksFromContentTime, currentPlaybackStartTimestamp != nil {
-            storedPlaybackTime += Date().timeIntervalSince(currentPlaybackStartTimestamp!)
-            currentPlaybackStartTimestamp = nil
-            pausedByAdBreak = true
-        }
+        handleAdBreakStartState()
         
         self.adBreak = adBreak
         let mediaEvent = self.makeMediaEvent(name: .adBreakStart, options: options)
@@ -564,15 +560,32 @@ let PlayerOvp = "player_ovp"
 
     /// Indicates that the ad break is complete
     @objc public func logAdBreakEnd(options: Options?  = nil) {
-        if excludeAdBreaksFromContentTime, pausedByAdBreak {
-            currentPlaybackStartTimestamp = Date()
-            pausedByAdBreak = false
-        }
+        handleAdBreakEndState()
         
         let mediaEvent = self.makeMediaEvent(name: .adBreakEnd, options: options)
         mediaEvent.adBreak = self.adBreak
         self.logEvent(mediaEvent: mediaEvent)
         self.adBreak = nil
+    }
+    
+    // MARK: private helpers (ad break)
+    /// Pause content time tracking if ad-break exclusion is enabled.
+    private func handleAdBreakStartState() {
+        guard excludeAdBreaksFromContentTime,
+              currentPlaybackStartTimestamp != nil else { return }
+        
+        storedPlaybackTime += Date().timeIntervalSince(currentPlaybackStartTimestamp!)
+        currentPlaybackStartTimestamp = nil
+        pausedByAdBreak = true
+    }
+
+    /// Resume content time tracking if previously paused due to ad break.
+    private func handleAdBreakEndState() {
+        guard excludeAdBreaksFromContentTime,
+              pausedByAdBreak else { return }
+        
+        currentPlaybackStartTimestamp = Date()
+        pausedByAdBreak = false
     }
 
     // MARK: ad content
