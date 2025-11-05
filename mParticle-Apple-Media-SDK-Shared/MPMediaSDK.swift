@@ -239,6 +239,7 @@ let PlayerOvp = "player_ovp"
     @objc public var mediaSessionAttributes: [String:Any]
     @objc public var adContent: MPMediaAdContent?
     @objc public var adBreak: MPMediaAdBreak?
+    @objc public var excludeAdBreaksFromContentTime: Bool
     @objc public var segment: MPMediaSegment?
     @objc public var mediaEventListener: ((MPMediaEvent)->Void)?
     
@@ -273,7 +274,7 @@ let PlayerOvp = "player_ovp"
     private(set) public var currentPlaybackStartTimestamp: Date? //Timestamp for beginning of current playback
     private(set) public var storedPlaybackTime: Double = 0 //On Pause calculate playback time and clear currentPlaybackTime
     private var sessionSummarySent = false // Ensures we only send summary event once
-    
+    private var pausedByAdBreak = false // Internal marker used to know whether to auto-resume after an ad break
 
     // MARK: init
     /// Creates a media session object. This does not start a session, you can do so by calling `logMediaSessionStart`.
@@ -300,10 +301,41 @@ let PlayerOvp = "player_ovp"
         self.mediaSessionAttributes = [:]
         self.logMPEvents = false
         self.logMediaEvents = true
+        self.excludeAdBreaksFromContentTime = false
         
         let currentTimestamp = Date()
         self.mediaSessionStartTimestamp = currentTimestamp
         self.mediaSessionEndTimestamp = currentTimestamp
+    }
+    
+    /// Creates a media session object. This does not start a session, you can do so by calling `logMediaSessionStart`.
+    /// - Parameters:
+    ///   - coreSDK: The instance of mParticle core SDK to use
+    ///   - mediaContentId: A machine readable identifier representing the current media item
+    ///   - title: Session title
+    ///   - duration: The playback time of the media content in milliseconds
+    ///   - contentType: The type of the media content (e.g. video)
+    ///   - streamType: The stream type for the media (e.g. on-demand)
+    ///   - logMPEvents: Set to true if you would like custom events forwarded to the mParticle SDK
+    ///   - logMediaEvents: Set to true if you would like media events forwarded to the mParticle SDK
+    ///   - completeLimit: Int from 1 to 100 denotes percentage of progress needed to be considered "completed"
+    ///   - excludeAdBreaksFromContentTime: Set to `true` to exclude ad breaks from `mediaContentTimeSpent` calculation
+    @objc public convenience init(
+        coreSDK: MParticle?,
+        mediaContentId: String,
+        title: String,
+        duration: NSNumber?,
+        contentType: MPMediaContentType,
+        streamType: MPMediaStreamType,
+        excludeAdBreaksFromContentTime: Bool
+    ) {
+        self.init(coreSDK: coreSDK,
+                  mediaContentId: mediaContentId,
+                  title: title,
+                  duration: duration,
+                  contentType: contentType,
+                  streamType: streamType)
+        self.excludeAdBreaksFromContentTime = excludeAdBreaksFromContentTime
     }
     
     // MARK: init
@@ -337,16 +369,61 @@ let PlayerOvp = "player_ovp"
         if ( 100 >= completeLimit && completeLimit > 0) {
             self.mediaContentCompleteLimit = completeLimit
         }
+        self.excludeAdBreaksFromContentTime = false
         
         let currentTimestamp = Date()
         self.mediaSessionStartTimestamp = currentTimestamp
         self.mediaSessionEndTimestamp = currentTimestamp
     }
     
-    internal convenience init(coreSDK: MParticle?, mediaContentId: String, title: String, duration: NSNumber?, contentType: MPMediaContentType, streamType: MPMediaStreamType, logMPEvents: Bool, logMediaEvents: Bool, completeLimit: Int, testing: Bool) {
-        self.init(coreSDK: coreSDK, mediaContentId: mediaContentId, title: title, duration: duration, contentType: contentType, streamType: streamType, logMPEvents: logMPEvents, logMediaEvents: logMediaEvents, completeLimit: completeLimit)
-        
-        self.sessionSummarySent = true
+    @objc public convenience init(
+        coreSDK: MParticle?,
+        mediaContentId: String,
+        title: String,
+        duration: NSNumber?,
+        contentType: MPMediaContentType,
+        streamType: MPMediaStreamType,
+        logMPEvents: Bool,
+        logMediaEvents: Bool,
+        completeLimit: Int,
+        excludeAdBreaksFromContentTime: Bool
+    ) {
+        self.init(coreSDK: coreSDK,
+                  mediaContentId: mediaContentId,
+                  title: title,
+                  duration: duration,
+                  contentType: contentType,
+                  streamType: streamType,
+                  logMPEvents: logMPEvents,
+                  logMediaEvents: logMediaEvents,
+                  completeLimit: completeLimit)
+        self.excludeAdBreaksFromContentTime = excludeAdBreaksFromContentTime
+    }
+    
+    internal convenience init(
+        coreSDK: MParticle?,
+        mediaContentId: String,
+        title: String,
+        duration: NSNumber?,
+        contentType: MPMediaContentType,
+        streamType: MPMediaStreamType,
+        logMPEvents: Bool,
+        logMediaEvents: Bool,
+        completeLimit: Int,
+        excludeAdBreaksFromContentTime: Bool = false,
+        testing: Bool) {
+            self.init(coreSDK: coreSDK,
+                      mediaContentId: mediaContentId,
+                      title: title,
+                      duration: duration,
+                      contentType: contentType,
+                      streamType: streamType,
+                      logMPEvents: logMPEvents,
+                      logMediaEvents: logMediaEvents,
+                      completeLimit: completeLimit)
+
+            self.sessionSummarySent = true
+            self.excludeAdBreaksFromContentTime = excludeAdBreaksFromContentTime
     }
     
     deinit {
