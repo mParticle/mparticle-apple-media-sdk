@@ -550,6 +550,12 @@ let PlayerOvp = "player_ovp"
     // MARK: ad break
     /// Logs that a sequence of one or more ads has begun
     @objc public func logAdBreakStart(adBreak: MPMediaAdBreak, options: Options?  = nil) {
+        if excludeAdBreaksFromContentTime, currentPlaybackStartTimestamp != nil {
+            storedPlaybackTime += Date().timeIntervalSince(currentPlaybackStartTimestamp!)
+            currentPlaybackStartTimestamp = nil
+            pausedByAdBreak = true
+        }
+        
         self.adBreak = adBreak
         let mediaEvent = self.makeMediaEvent(name: .adBreakStart, options: options)
         mediaEvent.adBreak = self.adBreak
@@ -558,6 +564,11 @@ let PlayerOvp = "player_ovp"
 
     /// Indicates that the ad break is complete
     @objc public func logAdBreakEnd(options: Options?  = nil) {
+        if excludeAdBreaksFromContentTime, pausedByAdBreak {
+            currentPlaybackStartTimestamp = Date()
+            pausedByAdBreak = false
+        }
+        
         let mediaEvent = self.makeMediaEvent(name: .adBreakEnd, options: options)
         mediaEvent.adBreak = self.adBreak
         self.logEvent(mediaEvent: mediaEvent)
