@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "DBD815E72319A7F400A9809C"
-               BuildableName = "mParticle_Apple_Media_SDK.framework"
-               BlueprintName = "mParticle-Apple-Media-SDK"
+               BlueprintIdentifier = "7294ED962E5515DA00B24819"
+               BuildableName = "mParticle_Apple_Media_SDK_NoLocation.framework"
+               BlueprintName = "mParticle-Apple-Media-SDK-NoLocation"
                ReferencedContainer = "container:mParticle-Apple-Media-SDK.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -74,9 +74,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "DBD815E72319A7F400A9809C"
-            BuildableName = "mParticle_Apple_Media_SDK.framework"
-            BlueprintName = "mParticle-Apple-Media-SDK"
+            BlueprintIdentifier = "7294ED962E5515DA00B24819"
+            BuildableName = "mParticle_Apple_Media_SDK_NoLocation.framework"
+            BlueprintName = "mParticle-Apple-Media-SDK-NoLocation"
             ReferencedContainer = "container:mParticle-Apple-Media-SDK.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
