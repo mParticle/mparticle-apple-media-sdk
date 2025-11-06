@@ -1,8 +1,8 @@
 import UIKit
 #if canImport(mParticle_Apple_Media_SDK_NoLocation)
-@_exported import mParticle_Apple_SDK_NoLocation
+import mParticle_Apple_SDK_NoLocation
 #else
-@_exported import mParticle_Apple_SDK
+import mParticle_Apple_SDK
 #endif
 
 let MediaAttributeKeysMediaSessionId = "media_session_id"
