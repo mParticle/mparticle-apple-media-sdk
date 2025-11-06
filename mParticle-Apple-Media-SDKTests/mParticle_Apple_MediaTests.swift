@@ -1,8 +1,10 @@
 import XCTest
 #if canImport(mParticle_Apple_Media_SDK_NoLocation)
 @testable import mParticle_Apple_Media_SDK_NoLocation
+import mParticle_Apple_SDK_NoLocation
 #elseif canImport(mParticle_Apple_Media_SDK)
 @testable import mParticle_Apple_Media_SDK
+import mParticle_Apple_SDK
 #endif
 
 private let defaultTimeout = 10.0
