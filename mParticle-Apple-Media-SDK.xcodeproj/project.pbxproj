@@ -95,7 +95,6 @@
 		DBD815DE2319A7F400A9809C = {
 			isa = PBXGroup;
 			children = (
-				72EDDC762EBD3142004C0EB8 /* mParticle-Apple-Media-SDK-NoLocation.xctestplan */,
 				DBD815EA2319A7F400A9809C /* mParticle-Apple-Media-SDK */,
 				DBD815F52319A7F500A9809C /* mParticle-Apple-Media-SDKTests */,
 				DBD815E92319A7F400A9809C /* Products */,
