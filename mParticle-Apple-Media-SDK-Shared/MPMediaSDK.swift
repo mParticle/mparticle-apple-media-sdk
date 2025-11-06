@@ -274,7 +274,6 @@ let PlayerOvp = "player_ovp"
     private(set) public var currentPlaybackStartTimestamp: Date? //Timestamp for beginning of current playback
     private(set) public var storedPlaybackTime: Double = 0 //On Pause calculate playback time and clear currentPlaybackTime
     private var sessionSummarySent = false // Ensures we only send summary event once
-    private var pausedByAdBreak = false // Internal marker used to know whether to auto-resume after an ad break
 
     // MARK: init
     /// Creates a media session object. This does not start a session, you can do so by calling `logMediaSessionStart`.
@@ -550,7 +549,7 @@ let PlayerOvp = "player_ovp"
     // MARK: ad break
     /// Logs that a sequence of one or more ads has begun
     @objc public func logAdBreakStart(adBreak: MPMediaAdBreak, options: Options?  = nil) {
-        self.handleAdBreakStartState()
+        self.pauseContentTimeIfAdBreakExclusionEnabled()
         
         self.adBreak = adBreak
         let mediaEvent = self.makeMediaEvent(name: .adBreakStart, options: options)
@@ -560,7 +559,7 @@ let PlayerOvp = "player_ovp"
 
     /// Indicates that the ad break is complete
     @objc public func logAdBreakEnd(options: Options?  = nil) {
-        self.handleAdBreakEndState()
+        self.resumeContentTimeIfAdBreakExclusionEnabled()
         
         let mediaEvent = self.makeMediaEvent(name: .adBreakEnd, options: options)
         mediaEvent.adBreak = self.adBreak
@@ -569,23 +568,15 @@ let PlayerOvp = "player_ovp"
     }
     
     // MARK: private helpers (ad break)
-    /// Pause content time tracking if ad-break exclusion is enabled.
-    private func handleAdBreakStartState() {
-        guard self.excludeAdBreaksFromContentTime,
-              self.currentPlaybackStartTimestamp != nil else { return }
-        
-        self.storedPlaybackTime += Date().timeIntervalSince(self.currentPlaybackStartTimestamp ?? Date())
+    private func pauseContentTimeIfAdBreakExclusionEnabled() {
+        guard self.excludeAdBreaksFromContentTime, self.currentPlaybackStartTimestamp != nil else { return }
+        self.storedPlaybackTime += Date().timeIntervalSince(self.currentPlaybackStartTimestamp!)
         self.currentPlaybackStartTimestamp = nil
-        self.pausedByAdBreak = true
     }
 
-    /// Resume content time tracking if previously paused due to ad break.
-    private func handleAdBreakEndState() {
-        guard self.excludeAdBreaksFromContentTime,
-              self.pausedByAdBreak else { return }
-        
+    private func resumeContentTimeIfAdBreakExclusionEnabled() {
+        guard self.excludeAdBreaksFromContentTime, self.currentPlaybackStartTimestamp == nil else { return }
         self.currentPlaybackStartTimestamp = Date()
-        self.pausedByAdBreak = false
     }
 
     // MARK: ad content
