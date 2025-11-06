@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "7294ED962E5515DA00B24819"
-               BuildableName = "mParticle-Apple-Media-SDK-NoLocation.framework"
+               BuildableName = "mParticle_Apple_Media_SDK_NoLocation.framework"
                BlueprintName = "mParticle-Apple-Media-SDK-NoLocation"
                ReferencedContainer = "container:mParticle-Apple-Media-SDK.xcodeproj">
             </BuildableReference>
@@ -27,8 +27,13 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES"
-      shouldAutocreateTestPlan = "YES">
+      shouldUseLaunchSchemeArgsEnv = "YES">
+      <TestPlans>
+         <TestPlanReference
+            reference = "container:mParticle-Apple-Media-SDK-NoLocation.xctestplan"
+            default = "YES">
+         </TestPlanReference>
+      </TestPlans>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -51,7 +56,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "7294ED962E5515DA00B24819"
-            BuildableName = "mParticle-Apple-Media-SDK-NoLocation.framework"
+            BuildableName = "mParticle_Apple_Media_SDK_NoLocation.framework"
             BlueprintName = "mParticle-Apple-Media-SDK-NoLocation"
             ReferencedContainer = "container:mParticle-Apple-Media-SDK.xcodeproj">
          </BuildableReference>

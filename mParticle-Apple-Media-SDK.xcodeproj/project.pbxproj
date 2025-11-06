@@ -7,10 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		72566C7D2EBD2E23003524A6 /* mParticle_Apple_MediaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD815F62319A7F500A9809C /* mParticle_Apple_MediaTests.swift */; };
 		7294ED982E5515DA00B24819 /* mParticle_Apple_Media_SDK.h in Headers */ = {isa = PBXBuildFile; fileRef = DBD815EB2319A7F400A9809C /* mParticle_Apple_Media_SDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7294ED9A2E5515DA00B24819 /* MPMediaSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD816022319A8B900A9809C /* MPMediaSDK.swift */; };
 		7294EDA42E55178300B24819 /* mParticle-Apple-SDK in Frameworks */ = {isa = PBXBuildFile; productRef = 7294EDA32E55178300B24819 /* mParticle-Apple-SDK */; };
 		7294EDA62E55178300B24819 /* mParticle-Apple-SDK-NoLocation in Frameworks */ = {isa = PBXBuildFile; productRef = 7294EDA52E55178300B24819 /* mParticle-Apple-SDK-NoLocation */; };
+		72EDDC772EBD33E3004C0EB8 /* mParticle_Apple_Media_SDK_NoLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7294EDA02E5515DA00B24819 /* mParticle_Apple_Media_SDK_NoLocation.framework */; };
 		DBD815F22319A7F500A9809C /* mParticle_Apple_Media_SDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DBD815E82319A7F400A9809C /* mParticle_Apple_Media_SDK.framework */; };
 		DBD815F72319A7F500A9809C /* mParticle_Apple_MediaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD815F62319A7F500A9809C /* mParticle_Apple_MediaTests.swift */; };
 		DBD815F92319A7F500A9809C /* mParticle_Apple_Media_SDK.h in Headers */ = {isa = PBXBuildFile; fileRef = DBD815EB2319A7F400A9809C /* mParticle_Apple_Media_SDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -18,6 +20,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		727F5D562EBD37AF000B3E7C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DBD815DF2319A7F400A9809C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7294ED962E5515DA00B24819;
+			remoteInfo = "mParticle-Apple-Media-SDK-NoLocation";
+		};
 		DBD815F32319A7F500A9809C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = DBD815DF2319A7F400A9809C /* Project object */;
@@ -28,7 +37,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		7294EDA02E5515DA00B24819 /* mParticle-Apple-Media-SDK-NoLocation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = "mParticle-Apple-Media-SDK-NoLocation.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		72566C842EBD2E23003524A6 /* mParticle-Apple-Media-SDK-NoLocationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "mParticle-Apple-Media-SDK-NoLocationTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7294EDA02E5515DA00B24819 /* mParticle_Apple_Media_SDK_NoLocation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = mParticle_Apple_Media_SDK_NoLocation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		72EDDC762EBD3142004C0EB8 /* mParticle-Apple-Media-SDK-NoLocation.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "mParticle-Apple-Media-SDK-NoLocation.xctestplan"; sourceTree = "<group>"; };
 		DBD815E82319A7F400A9809C /* mParticle_Apple_Media_SDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = mParticle_Apple_Media_SDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DBD815EB2319A7F400A9809C /* mParticle_Apple_Media_SDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mParticle_Apple_Media_SDK.h; sourceTree = "<group>"; };
 		DBD815EC2319A7F400A9809C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -39,6 +50,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		72566C7E2EBD2E23003524A6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				72EDDC772EBD33E3004C0EB8 /* mParticle_Apple_Media_SDK_NoLocation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7294ED9B2E5515DA00B24819 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -76,6 +95,7 @@
 		DBD815DE2319A7F400A9809C = {
 			isa = PBXGroup;
 			children = (
+				72EDDC762EBD3142004C0EB8 /* mParticle-Apple-Media-SDK-NoLocation.xctestplan */,
 				DBD815EA2319A7F400A9809C /* mParticle-Apple-Media-SDK */,
 				DBD815F52319A7F500A9809C /* mParticle-Apple-Media-SDKTests */,
 				DBD815E92319A7F400A9809C /* Products */,
@@ -88,7 +108,8 @@
 			children = (
 				DBD815E82319A7F400A9809C /* mParticle_Apple_Media_SDK.framework */,
 				DBD815F12319A7F500A9809C /* mParticle-Apple-Media-SDKTests.xctest */,
-				7294EDA02E5515DA00B24819 /* mParticle-Apple-Media-SDK-NoLocation.framework */,
+				7294EDA02E5515DA00B24819 /* mParticle_Apple_Media_SDK_NoLocation.framework */,
+				72566C842EBD2E23003524A6 /* mParticle-Apple-Media-SDK-NoLocationTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -134,6 +155,24 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		72566C792EBD2E23003524A6 /* mParticle-Apple-Media-SDK-NoLocationTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 72566C812EBD2E23003524A6 /* Build configuration list for PBXNativeTarget "mParticle-Apple-Media-SDK-NoLocationTests" */;
+			buildPhases = (
+				72566C7C2EBD2E23003524A6 /* Sources */,
+				72566C7E2EBD2E23003524A6 /* Frameworks */,
+				72566C802EBD2E23003524A6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				727F5D572EBD37AF000B3E7C /* PBXTargetDependency */,
+			);
+			name = "mParticle-Apple-Media-SDK-NoLocationTests";
+			productName = "mParticle-Apple-Media-SDKTests";
+			productReference = 72566C842EBD2E23003524A6 /* mParticle-Apple-Media-SDK-NoLocationTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		7294ED962E5515DA00B24819 /* mParticle-Apple-Media-SDK-NoLocation */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7294ED9D2E5515DA00B24819 /* Build configuration list for PBXNativeTarget "mParticle-Apple-Media-SDK-NoLocation" */;
@@ -146,10 +185,11 @@
 			buildRules = (
 			);
 			dependencies = (
+				72EDDC792EBD34B8004C0EB8 /* PBXTargetDependency */,
 			);
 			name = "mParticle-Apple-Media-SDK-NoLocation";
 			productName = "mParticle-Apple-Media-SDK";
-			productReference = 7294EDA02E5515DA00B24819 /* mParticle-Apple-Media-SDK-NoLocation.framework */;
+			productReference = 7294EDA02E5515DA00B24819 /* mParticle_Apple_Media_SDK_NoLocation.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		DBD815E72319A7F400A9809C /* mParticle-Apple-Media-SDK */ = {
@@ -164,6 +204,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				727F5D592EBD37C6000B3E7C /* PBXTargetDependency */,
 			);
 			name = "mParticle-Apple-Media-SDK";
 			productName = "mParticle-Apple-Media-SDK";
@@ -226,11 +267,19 @@
 				DBD815E72319A7F400A9809C /* mParticle-Apple-Media-SDK */,
 				7294ED962E5515DA00B24819 /* mParticle-Apple-Media-SDK-NoLocation */,
 				DBD815F02319A7F500A9809C /* mParticle-Apple-Media-SDKTests */,
+				72566C792EBD2E23003524A6 /* mParticle-Apple-Media-SDK-NoLocationTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		72566C802EBD2E23003524A6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7294ED9C2E5515DA00B24819 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -255,6 +304,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		72566C7C2EBD2E23003524A6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				72566C7D2EBD2E23003524A6 /* mParticle_Apple_MediaTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7294ED992E5515DA00B24819 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -282,6 +339,19 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		727F5D572EBD37AF000B3E7C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7294ED962E5515DA00B24819 /* mParticle-Apple-Media-SDK-NoLocation */;
+			targetProxy = 727F5D562EBD37AF000B3E7C /* PBXContainerItemProxy */;
+		};
+		727F5D592EBD37C6000B3E7C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 727F5D582EBD37C6000B3E7C /* mParticle-Apple-SDK */;
+		};
+		72EDDC792EBD34B8004C0EB8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 72EDDC782EBD34B8004C0EB8 /* mParticle-Apple-SDK-NoLocation */;
+		};
 		DBD815F42319A7F500A9809C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = DBD815E72319A7F400A9809C /* mParticle-Apple-Media-SDK */;
@@ -290,6 +360,56 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		72566C822EBD2E23003524A6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = DLD43Y3TRP;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(BUILT_PRODUCTS_DIR)",
+				);
+				INFOPLIST_FILE = "mParticle-Apple-Media-SDKTests/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.mparticle.mParticle-Apple-Media-SDKTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		72566C832EBD2E23003524A6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = DLD43Y3TRP;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(BUILT_PRODUCTS_DIR)",
+				);
+				INFOPLIST_FILE = "mParticle-Apple-Media-SDKTests/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.mparticle.mParticle-Apple-Media-SDKTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		7294ED9E2E5515DA00B24819 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -317,7 +437,8 @@
 					"$(SRCROOT)/Carthage/Build/iOS/**",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mparticle.mParticle-Apple-Media-SDK";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_MODULE_NAME = mParticle_Apple_Media_SDK_NoLocation;
+				PRODUCT_NAME = mParticle_Apple_Media_SDK_NoLocation;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -352,7 +473,8 @@
 					"$(SRCROOT)/Carthage/Build/iOS/**",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mparticle.mParticle-Apple-Media-SDK";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_MODULE_NAME = mParticle_Apple_Media_SDK_NoLocation;
+				PRODUCT_NAME = mParticle_Apple_Media_SDK_NoLocation;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -607,6 +729,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		72566C812EBD2E23003524A6 /* Build configuration list for PBXNativeTarget "mParticle-Apple-Media-SDK-NoLocationTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				72566C822EBD2E23003524A6 /* Debug */,
+				72566C832EBD2E23003524A6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		7294ED9D2E5515DA00B24819 /* Build configuration list for PBXNativeTarget "mParticle-Apple-Media-SDK-NoLocation" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -657,12 +788,22 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		727F5D582EBD37C6000B3E7C /* mParticle-Apple-SDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7294EDA22E55178300B24819 /* XCRemoteSwiftPackageReference "mparticle-apple-sdk" */;
+			productName = "mParticle-Apple-SDK";
+		};
 		7294EDA32E55178300B24819 /* mParticle-Apple-SDK */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 7294EDA22E55178300B24819 /* XCRemoteSwiftPackageReference "mparticle-apple-sdk" */;
 			productName = "mParticle-Apple-SDK";
 		};
 		7294EDA52E55178300B24819 /* mParticle-Apple-SDK-NoLocation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7294EDA22E55178300B24819 /* XCRemoteSwiftPackageReference "mparticle-apple-sdk" */;
+			productName = "mParticle-Apple-SDK-NoLocation";
+		};
+		72EDDC782EBD34B8004C0EB8 /* mParticle-Apple-SDK-NoLocation */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 7294EDA22E55178300B24819 /* XCRemoteSwiftPackageReference "mparticle-apple-sdk" */;
 			productName = "mParticle-Apple-SDK-NoLocation";

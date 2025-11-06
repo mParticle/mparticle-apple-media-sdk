@@ -1,0 +1,25 @@
+{
+  "configurations" : [
+    {
+      "id" : "2AFB55CF-A3C9-4D52-BD46-DD27F6756DC0",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false,
+    "performanceAntipatternCheckerEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:mParticle-Apple-Media-SDK.xcodeproj",
+        "identifier" : "72566C792EBD2E23003524A6",
+        "name" : "mParticle-Apple-Media-SDK-NoLocationTests"
+      }
+    }
+  ],
+  "version" : 1
+}
