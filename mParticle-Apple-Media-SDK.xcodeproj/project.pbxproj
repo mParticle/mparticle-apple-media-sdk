@@ -39,7 +39,6 @@
 /* Begin PBXFileReference section */
 		72566C842EBD2E23003524A6 /* mParticle-Apple-Media-SDK-NoLocationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "mParticle-Apple-Media-SDK-NoLocationTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7294EDA02E5515DA00B24819 /* mParticle_Apple_Media_SDK_NoLocation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = mParticle_Apple_Media_SDK_NoLocation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		72EDDC762EBD3142004C0EB8 /* mParticle-Apple-Media-SDK-NoLocation.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "mParticle-Apple-Media-SDK-NoLocation.xctestplan"; sourceTree = "<group>"; };
 		DBD815E82319A7F400A9809C /* mParticle_Apple_Media_SDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = mParticle_Apple_Media_SDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DBD815EB2319A7F400A9809C /* mParticle_Apple_Media_SDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mParticle_Apple_Media_SDK.h; sourceTree = "<group>"; };
 		DBD815EC2319A7F400A9809C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
