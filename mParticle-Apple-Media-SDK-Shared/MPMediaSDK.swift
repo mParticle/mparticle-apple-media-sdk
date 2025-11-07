@@ -239,6 +239,7 @@ let PlayerOvp = "player_ovp"
     @objc public var mediaSessionAttributes: [String:Any]
     @objc public var adContent: MPMediaAdContent?
     @objc public var adBreak: MPMediaAdBreak?
+    @objc public var excludeAdBreaksFromContentTime: Bool
     @objc public var segment: MPMediaSegment?
     @objc public var mediaEventListener: ((MPMediaEvent)->Void)?
     
@@ -273,7 +274,6 @@ let PlayerOvp = "player_ovp"
     private(set) public var currentPlaybackStartTimestamp: Date? //Timestamp for beginning of current playback
     private(set) public var storedPlaybackTime: Double = 0 //On Pause calculate playback time and clear currentPlaybackTime
     private var sessionSummarySent = false // Ensures we only send summary event once
-    
 
     // MARK: init
     /// Creates a media session object. This does not start a session, you can do so by calling `logMediaSessionStart`.
@@ -284,7 +284,7 @@ let PlayerOvp = "player_ovp"
     /// :param: duration The playback time of the media content in milliseconds
     /// :param: contentType The type of the media content (e.g. video)
     /// :param: streamType The stream type for the media (e.g. on-demand)
-    @objc public init(coreSDK: MParticle?, mediaContentId: String, title: String, duration: NSNumber?, contentType: MPMediaContentType, streamType: MPMediaStreamType) {
+    @objc public init(coreSDK: MParticle?, mediaContentId: String, title: String, duration: NSNumber?, contentType: MPMediaContentType, streamType: MPMediaStreamType, excludeAdBreaksFromContentTime: Bool = false) {
         if let coreSDK = coreSDK {
             self.coreSDK = coreSDK
         } else {
@@ -296,6 +296,7 @@ let PlayerOvp = "player_ovp"
         self.duration = duration
         self.contentType = contentType
         self.streamType = streamType
+        self.excludeAdBreaksFromContentTime = excludeAdBreaksFromContentTime
         self.mediaSessionId = NSUUID().uuidString
         self.mediaSessionAttributes = [:]
         self.logMPEvents = false
@@ -318,7 +319,7 @@ let PlayerOvp = "player_ovp"
     /// :param: logMPEvents Set to true if you would like custom events forwarded to the mParticle SDK
     /// :param: logMediaEvents Set to true if you would like media events forwarded to the mParticle SDK
     /// :param: completeLimit Int from 1 to 100 denotes percentage of progress needed to be considered "completed"
-    @objc public init(coreSDK: MParticle?, mediaContentId: String, title: String, duration: NSNumber?, contentType: MPMediaContentType, streamType: MPMediaStreamType, logMPEvents: Bool, logMediaEvents: Bool, completeLimit: Int) {
+    @objc public init(coreSDK: MParticle?, mediaContentId: String, title: String, duration: NSNumber?, contentType: MPMediaContentType, streamType: MPMediaStreamType, excludeAdBreaksFromContentTime: Bool = false, logMPEvents: Bool, logMediaEvents: Bool, completeLimit: Int) {
         if let coreSDK = coreSDK {
             self.coreSDK = coreSDK
         } else {
@@ -330,6 +331,7 @@ let PlayerOvp = "player_ovp"
         self.duration = duration
         self.contentType = contentType
         self.streamType = streamType
+        self.excludeAdBreaksFromContentTime = excludeAdBreaksFromContentTime
         self.mediaSessionId = NSUUID().uuidString
         self.mediaSessionAttributes = [:]
         self.logMPEvents = logMPEvents
@@ -337,16 +339,37 @@ let PlayerOvp = "player_ovp"
         if ( 100 >= completeLimit && completeLimit > 0) {
             self.mediaContentCompleteLimit = completeLimit
         }
+        self.excludeAdBreaksFromContentTime = excludeAdBreaksFromContentTime
         
         let currentTimestamp = Date()
         self.mediaSessionStartTimestamp = currentTimestamp
         self.mediaSessionEndTimestamp = currentTimestamp
     }
     
-    internal convenience init(coreSDK: MParticle?, mediaContentId: String, title: String, duration: NSNumber?, contentType: MPMediaContentType, streamType: MPMediaStreamType, logMPEvents: Bool, logMediaEvents: Bool, completeLimit: Int, testing: Bool) {
-        self.init(coreSDK: coreSDK, mediaContentId: mediaContentId, title: title, duration: duration, contentType: contentType, streamType: streamType, logMPEvents: logMPEvents, logMediaEvents: logMediaEvents, completeLimit: completeLimit)
-        
-        self.sessionSummarySent = true
+    internal convenience init(
+        coreSDK: MParticle?,
+        mediaContentId: String,
+        title: String,
+        duration: NSNumber?,
+        contentType: MPMediaContentType,
+        streamType: MPMediaStreamType,
+        logMPEvents: Bool,
+        logMediaEvents: Bool,
+        completeLimit: Int,
+        excludeAdBreaksFromContentTime: Bool = false,
+        testing: Bool) {
+            self.init(coreSDK: coreSDK,
+                      mediaContentId: mediaContentId,
+                      title: title,
+                      duration: duration,
+                      contentType: contentType,
+                      streamType: streamType,
+                      excludeAdBreaksFromContentTime: excludeAdBreaksFromContentTime,
+                      logMPEvents: logMPEvents,
+                      logMediaEvents: logMediaEvents,
+                      completeLimit: completeLimit)
+
+            self.sessionSummarySent = true
     }
     
     deinit {
@@ -473,6 +496,8 @@ let PlayerOvp = "player_ovp"
     // MARK: ad break
     /// Logs that a sequence of one or more ads has begun
     @objc public func logAdBreakStart(adBreak: MPMediaAdBreak, options: Options?  = nil) {
+        pauseContentTimeIfAdBreakExclusionEnabled()
+        
         self.adBreak = adBreak
         let mediaEvent = self.makeMediaEvent(name: .adBreakStart, options: options)
         mediaEvent.adBreak = self.adBreak
@@ -481,10 +506,24 @@ let PlayerOvp = "player_ovp"
 
     /// Indicates that the ad break is complete
     @objc public func logAdBreakEnd(options: Options?  = nil) {
+        resumeContentTimeIfAdBreakExclusionEnabled()
+        
         let mediaEvent = self.makeMediaEvent(name: .adBreakEnd, options: options)
         mediaEvent.adBreak = self.adBreak
         self.logEvent(mediaEvent: mediaEvent)
         self.adBreak = nil
+    }
+    
+    // MARK: private helpers (ad break)
+    private func pauseContentTimeIfAdBreakExclusionEnabled() {
+        guard excludeAdBreaksFromContentTime, currentPlaybackStartTimestamp != nil else { return }
+        storedPlaybackTime += Date().timeIntervalSince(currentPlaybackStartTimestamp!)
+        currentPlaybackStartTimestamp = nil
+    }
+
+    private func resumeContentTimeIfAdBreakExclusionEnabled() {
+        guard excludeAdBreaksFromContentTime, currentPlaybackStartTimestamp == nil else { return }
+        currentPlaybackStartTimestamp = Date()
     }
 
     // MARK: ad content

@@ -61,12 +61,23 @@ mParticle.start(with: options)
 // Later in your code, when a user begins to engage with your content
 let mediaSession = MPMediaSession.init(
     coreSDK: mParticle,                 // mParticle SDK Instance
-    mediaContentId: '1234567',          // Custom media ID
-    title: 'Funny internet cat video',  // Custom media Title
+    mediaContentId: "1234567",          // Custom media ID
+    title: "Funny internet cat video",  // Custom media Title
     duration: 120000,                   // Duration in milliseconds
     contentType: .video,                // Content Type (Video or Audio)
-    streamType: .onDemand)              // Stream Type (OnDemand, Live, etc.)
+    streamType: .onDemand               // Stream Type (OnDemand, Live, etc.)
+)
 
+// OR, optionally exclude ad break time from content time tracking when using `logAdBreakStart` and `logAdBreakEnd`
+let mediaSession = MPMediaSession.init(
+    coreSDK: mParticle,
+    mediaContentId: "1234567",
+    title: "Funny internet cat video",
+    duration: 120000,
+    contentType: .video,
+    streamType: .onDemand,
+    excludeAdBreaksFromContentTime: true // Optional flag (defaults to false)
+)
 
 mediaSession.logMediaSessionStart()
 mediaSession.logPlay()

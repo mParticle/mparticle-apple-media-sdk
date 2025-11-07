@@ -247,7 +247,7 @@
 				};
 			};
 			buildConfigurationList = DBD815E22319A7F400A9809C /* Build configuration list for PBXProject "mParticle-Apple-Media-SDK" */;
-			compatibilityVersion = "Xcode 9.3";
+			compatibilityVersion = "Xcode 12.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
