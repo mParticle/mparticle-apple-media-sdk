@@ -68,7 +68,7 @@ let mediaSession = MPMediaSession.init(
     streamType: .onDemand               // Stream Type (OnDemand, Live, etc.)
 )
 
-// OR, optionally exclude ad break time from content time tracking
+// OR, optionally exclude ad break time from content time tracking when using `logAdBreakStart` and `logAdBreakEnd`
 let mediaSession = MPMediaSession.init(
     coreSDK: mParticle,
     mediaContentId: "1234567",
