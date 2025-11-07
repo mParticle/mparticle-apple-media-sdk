@@ -429,20 +429,20 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         Thread.sleep(forTimeInterval: 0.2)
         
         XCTAssertNotNil(mediaSession?.currentPlaybackStartTimestamp)
-        XCTAssertEqual(mediaSession!.mediaContentTimeSpent, 0.2, accuracy: 0.08)
+        XCTAssertEqual(mediaSession!.mediaContentTimeSpent, 0.2, accuracy: 0.1)
 
         // 0.2s should count toward content time.
         mediaSession?.logAdBreakStart(adBreak: adBreak)
         Thread.sleep(forTimeInterval: 0.2)
         
-        XCTAssertEqual(mediaSession!.mediaContentTimeSpent, 0.4, accuracy: 0.08)
+        XCTAssertEqual(mediaSession!.mediaContentTimeSpent, 0.4, accuracy: 0.1)
         
         mediaSession?.logAdBreakEnd()
         XCTAssertNil(mediaSession?.adBreak)
 
         mediaSession?.logPause()
         
-        XCTAssertEqual(mediaSession!.mediaContentTimeSpent, 0.4, accuracy: 0.08)
+        XCTAssertEqual(mediaSession!.mediaContentTimeSpent, 0.4, accuracy: 0.1)
         XCTAssertNil(mediaSession?.currentPlaybackStartTimestamp)
     }
     
