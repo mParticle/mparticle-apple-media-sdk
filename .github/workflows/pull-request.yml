@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  pull_request:
+
+env:
+  XCODE_VERSION: "16.4"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
+  id-token: write
+
+jobs:
+  pr-branch-check-name:
+    name: "Check PR for semantic branch name"
+    uses: mParticle/mparticle-workflows/.github/workflows/pr-branch-check-name.yml@stable
+  pr-title-check:
+    name: "Check PR for semantic title"
+    uses: mParticle/mparticle-workflows/.github/workflows/pr-title-check.yml@stable
+
+  native-unit-tests:
+    strategy:
+      matrix:
+        platform: [iOS]
+        scheme: [mParticle-Apple-Media-SDK, mParticle-Apple-Media-SDK-NoLocation]
+        include:
+          - platform: iOS
+            device: iPhone 16 Pro
+    runs-on: macOS-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+
+      - name: Run iOS unit tests
+        run: xcodebuild -project mParticle-Apple-Media-SDK.xcodeproj -scheme ${{ matrix.scheme }} -destination 'platform=${{ matrix.platform }} Simulator,name=${{ matrix.device }},OS=latest' test
+
+  pr-notify:
+    if: >
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.draft == false
+    needs:
+      - native-unit-tests
+    name: Notify GChat
+    uses: ROKT/rokt-workflows/.github/workflows/oss_pr_opened_notification.yml@main
+    secrets:
+      gchat_webhook: ${{ secrets.GCHAT_PRS_WEBHOOK }}
