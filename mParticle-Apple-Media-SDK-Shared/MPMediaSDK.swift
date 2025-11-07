@@ -346,30 +346,6 @@ let PlayerOvp = "player_ovp"
         self.mediaSessionEndTimestamp = currentTimestamp
     }
     
-//    @objc public convenience init(
-//        coreSDK: MParticle?,
-//        mediaContentId: String,
-//        title: String,
-//        duration: NSNumber?,
-//        contentType: MPMediaContentType,
-//        streamType: MPMediaStreamType,
-//        logMPEvents: Bool,
-//        logMediaEvents: Bool,
-//        completeLimit: Int,
-//        excludeAdBreaksFromContentTime: Bool = false
-//    ) {
-//        self.init(coreSDK: coreSDK,
-//                  mediaContentId: mediaContentId,
-//                  title: title,
-//                  duration: duration,
-//                  contentType: contentType,
-//                  streamType: streamType,
-//                  logMPEvents: logMPEvents,
-//                  logMediaEvents: logMediaEvents,
-//                  completeLimit: completeLimit)
-//        self.excludeAdBreaksFromContentTime = excludeAdBreaksFromContentTime
-//    }
-    
     internal convenience init(
         coreSDK: MParticle?,
         mediaContentId: String,
@@ -388,12 +364,12 @@ let PlayerOvp = "player_ovp"
                       duration: duration,
                       contentType: contentType,
                       streamType: streamType,
+                      excludeAdBreaksFromContentTime: excludeAdBreaksFromContentTime,
                       logMPEvents: logMPEvents,
                       logMediaEvents: logMediaEvents,
                       completeLimit: completeLimit)
 
             self.sessionSummarySent = true
-            self.excludeAdBreaksFromContentTime = excludeAdBreaksFromContentTime
     }
     
     deinit {
