@@ -697,13 +697,14 @@ let PlayerOvp = "player_ovp"
     }
     
     private func logAdSummary() {
-        guard let adContent = adContent,
-              let start = adContent.adStartTimestamp else { return }
+        guard let adContent = adContent else { return }
         
-        if adContent.adEndTimestamp == nil {
-            let end = Date()
-            self.adContent?.adEndTimestamp = end
-            mediaTotalAdTimeSpent += end.timeIntervalSince(start)
+        if let start = adContent.adStartTimestamp {
+            if adContent.adEndTimestamp == nil {
+                let end = Date()
+                adContent.adEndTimestamp = end
+                mediaTotalAdTimeSpent += end.timeIntervalSince(start)
+            }
         }
         
         let event = MPEvent.init(name: MPAdSummary, type: .media)!
