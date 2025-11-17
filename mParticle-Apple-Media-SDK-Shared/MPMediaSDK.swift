@@ -339,7 +339,6 @@ let PlayerOvp = "player_ovp"
         if ( 100 >= completeLimit && completeLimit > 0) {
             self.mediaContentCompleteLimit = completeLimit
         }
-        self.excludeAdBreaksFromContentTime = excludeAdBreaksFromContentTime
         
         let currentTimestamp = Date()
         self.mediaSessionStartTimestamp = currentTimestamp
