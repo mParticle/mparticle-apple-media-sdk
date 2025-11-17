@@ -485,6 +485,45 @@ class mParticle_Apple_MediaTests: XCTestCase, MPListenerProtocol {
         XCTAssertEqual(mediaSession!.mediaContentTimeSpent, 0.6, accuracy: 0.08)
         XCTAssertNil(mediaSession?.currentPlaybackStartTimestamp)
     }
+    
+    func testAdBreakExclusionEnabledDoesNotResumeIfContentAlreadyPaused() {
+        let adBreak = MPMediaAdBreak(title: "foo adbreak title", id: "12345")
+        mediaSession?.excludeAdBreaksFromContentTime = true
+
+        // Start content playback and accumulate 0.2s before pausing
+        XCTAssertEqual(mediaSession!.mediaContentTimeSpent, 0)
+        mediaSession?.logPlay()
+        Thread.sleep(forTimeInterval: 0.2)
+
+        XCTAssertNotNil(mediaSession?.currentPlaybackStartTimestamp)
+        XCTAssertEqual(mediaSession!.mediaContentTimeSpent, 0.2, accuracy: 0.08)
+
+        // User manually pauses BEFORE ad break starts
+        mediaSession?.logPause()
+        Thread.sleep(forTimeInterval: 0.2)
+
+        XCTAssertEqual(mediaSession!.mediaContentTimeSpent, 0.2, accuracy: 0.08)
+        XCTAssertNil(mediaSession?.currentPlaybackStartTimestamp)
+
+        // Start ad break (should NOT affect playback state when already paused)
+        mediaSession?.logAdBreakStart(adBreak: adBreak)
+        Thread.sleep(forTimeInterval: 0.2)
+
+        // Nothing should change — still paused
+        XCTAssertEqual(mediaSession!.mediaContentTimeSpent, 0.2, accuracy: 0.08)
+        XCTAssertNil(mediaSession?.currentPlaybackStartTimestamp)
+
+        // End ad break — should NOT resume because the user had paused
+        mediaSession?.logAdBreakEnd()
+        Thread.sleep(forTimeInterval: 0.2)
+
+        // Content should STILL be paused (no auto-resume)
+        XCTAssertNil(mediaSession?.adBreak)
+        XCTAssertNil(mediaSession?.currentPlaybackStartTimestamp)
+
+        // No additional content time should have accumulated
+        XCTAssertEqual(mediaSession!.mediaContentTimeSpent, 0.2, accuracy: 0.08)
+    }
 
     func testLogSegmentStart() {
         let segment = MPMediaSegment(title: "foo segment title", index: 3, duration: 30000)
