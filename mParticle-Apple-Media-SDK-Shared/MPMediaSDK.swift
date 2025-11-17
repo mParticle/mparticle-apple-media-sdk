@@ -274,6 +274,7 @@ let PlayerOvp = "player_ovp"
     private(set) public var currentPlaybackStartTimestamp: Date? //Timestamp for beginning of current playback
     private(set) public var storedPlaybackTime: Double = 0 //On Pause calculate playback time and clear currentPlaybackTime
     private var sessionSummarySent = false // Ensures we only send summary event once
+    private var playbackState: PlaybackState = .pausedByUser // Tracks whether playback was playing, paused, or paused by ad break
 
     // MARK: init
     /// Creates a media session object. This does not start a session, you can do so by calling `logMediaSessionStart`.
@@ -443,6 +444,7 @@ let PlayerOvp = "player_ovp"
             self.currentPlaybackStartTimestamp = Date()
         }
         
+        playbackState = .playing
         let mediaEvent = self.makeMediaEvent(name: .play, options: options)
         self.logEvent(mediaEvent: mediaEvent)
     }
@@ -452,6 +454,7 @@ let PlayerOvp = "player_ovp"
         self.storedPlaybackTime = self.storedPlaybackTime + Date().timeIntervalSince(self.currentPlaybackStartTimestamp ?? Date())
         self.currentPlaybackStartTimestamp = nil;
         
+        playbackState = .pausedByUser
         let mediaEvent = self.makeMediaEvent(name: .pause, options: options)
         self.logEvent(mediaEvent: mediaEvent)
     }
@@ -515,14 +518,20 @@ let PlayerOvp = "player_ovp"
     
     // MARK: private helpers (ad break)
     private func pauseContentTimeIfAdBreakExclusionEnabled() {
-        guard excludeAdBreaksFromContentTime, currentPlaybackStartTimestamp != nil else { return }
+        guard excludeAdBreaksFromContentTime,
+              playbackState == .playing else { return }
+        
         storedPlaybackTime += Date().timeIntervalSince(currentPlaybackStartTimestamp!)
         currentPlaybackStartTimestamp = nil
+        playbackState = .pausedByAdBreak
     }
 
     private func resumeContentTimeIfAdBreakExclusionEnabled() {
-        guard excludeAdBreaksFromContentTime, currentPlaybackStartTimestamp == nil else { return }
+        guard excludeAdBreaksFromContentTime,
+              playbackState == .pausedByAdBreak else { return }
+        
         currentPlaybackStartTimestamp = Date()
+        playbackState = .playing
     }
 
     // MARK: ad content
@@ -1048,4 +1057,10 @@ public enum MPMediaEventNameString: String, RawRepresentable {
     case milestone = "Milestone"  //47
     case sessionSummary = "Media Session Summary"  //48
     case adSessionSummary = "Ad Session Summary"  //49
+}
+
+private enum PlaybackState {
+    case playing
+    case pausedByUser
+    case pausedByAdBreak
 }
