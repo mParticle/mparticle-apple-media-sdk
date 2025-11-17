@@ -688,29 +688,31 @@ let PlayerOvp = "player_ovp"
     }
     
     private func logAdSummary() {
-        if (self.adContent != nil) {
-            if (self.adContent?.adStartTimestamp != nil) {
-                self.adContent?.adEndTimestamp = Date()
-                self.mediaTotalAdTimeSpent += self.adContent!.adEndTimestamp!.timeIntervalSince(self.adContent!.adStartTimestamp!)
-            }
-            
-            let event = MPEvent.init(name: MPAdSummary, type: .media)!
-            let mediaEvent = self.makeMediaEvent(name: .adSessionSummary, options: nil)
-            
-            var customAttributes: [String:Any] = mediaEvent.getEventAttributes()
-            customAttributes[adBreakIdKey] = self.adBreak?.id
-            customAttributes[adContentIdKey] = self.adContent?.id
-            customAttributes[adContentStartTimestampKey] = self.adContent?.adStartTimestamp
-            customAttributes[adContentEndTimestampKey] = self.adContent?.adEndTimestamp
-            customAttributes[adContentTitleKey] = self.adContent?.title
-            customAttributes[adContentSkippedKey] = self.adContent?.adSkipped
-            customAttributes[adContentCompletedKey] = self.adContent?.adCompleted
-            
-            event.customAttributes = customAttributes
-            coreSDK.logEvent(event)
-            
-            self.adContent = nil
+        guard let adContent = adContent,
+              let start = adContent.adStartTimestamp else { return }
+        
+        if adContent.adEndTimestamp == nil {
+            let end = Date()
+            self.adContent?.adEndTimestamp = end
+            mediaTotalAdTimeSpent += end.timeIntervalSince(start)
         }
+        
+        let event = MPEvent.init(name: MPAdSummary, type: .media)!
+        let mediaEvent = self.makeMediaEvent(name: .adSessionSummary, options: nil)
+        
+        var customAttributes: [String:Any] = mediaEvent.getEventAttributes()
+        customAttributes[adBreakIdKey] = adBreak?.id
+        customAttributes[adContentIdKey] = adContent.id
+        customAttributes[adContentStartTimestampKey] = adContent.adStartTimestamp
+        customAttributes[adContentEndTimestampKey] = adContent.adEndTimestamp
+        customAttributes[adContentTitleKey] = adContent.title
+        customAttributes[adContentSkippedKey] = adContent.adSkipped
+        customAttributes[adContentCompletedKey] = adContent.adCompleted
+        
+        event.customAttributes = customAttributes
+        coreSDK.logEvent(event)
+        
+        self.adContent = nil
     }
 }
 
