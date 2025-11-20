@@ -274,6 +274,7 @@ let PlayerOvp = "player_ovp"
     private(set) public var currentPlaybackStartTimestamp: Date? //Timestamp for beginning of current playback
     private(set) public var storedPlaybackTime: Double = 0 //On Pause calculate playback time and clear currentPlaybackTime
     private var sessionSummarySent = false // Ensures we only send summary event once
+    private var playbackState: PlaybackState = .pausedByUser // Tracks whether playback was playing, paused, or paused by ad break
 
     // MARK: init
     /// Creates a media session object. This does not start a session, you can do so by calling `logMediaSessionStart`.
@@ -339,7 +340,6 @@ let PlayerOvp = "player_ovp"
         if ( 100 >= completeLimit && completeLimit > 0) {
             self.mediaContentCompleteLimit = completeLimit
         }
-        self.excludeAdBreaksFromContentTime = excludeAdBreaksFromContentTime
         
         let currentTimestamp = Date()
         self.mediaSessionStartTimestamp = currentTimestamp
@@ -444,6 +444,7 @@ let PlayerOvp = "player_ovp"
             self.currentPlaybackStartTimestamp = Date()
         }
         
+        playbackState = .playing
         let mediaEvent = self.makeMediaEvent(name: .play, options: options)
         self.logEvent(mediaEvent: mediaEvent)
     }
@@ -453,6 +454,7 @@ let PlayerOvp = "player_ovp"
         self.storedPlaybackTime = self.storedPlaybackTime + Date().timeIntervalSince(self.currentPlaybackStartTimestamp ?? Date())
         self.currentPlaybackStartTimestamp = nil;
         
+        playbackState = .pausedByUser
         let mediaEvent = self.makeMediaEvent(name: .pause, options: options)
         self.logEvent(mediaEvent: mediaEvent)
     }
@@ -516,14 +518,20 @@ let PlayerOvp = "player_ovp"
     
     // MARK: private helpers (ad break)
     private func pauseContentTimeIfAdBreakExclusionEnabled() {
-        guard excludeAdBreaksFromContentTime, currentPlaybackStartTimestamp != nil else { return }
+        guard excludeAdBreaksFromContentTime,
+              playbackState == .playing else { return }
+        
         storedPlaybackTime += Date().timeIntervalSince(currentPlaybackStartTimestamp!)
         currentPlaybackStartTimestamp = nil
+        playbackState = .pausedByAdBreak
     }
 
     private func resumeContentTimeIfAdBreakExclusionEnabled() {
-        guard excludeAdBreaksFromContentTime, currentPlaybackStartTimestamp == nil else { return }
+        guard excludeAdBreaksFromContentTime,
+              playbackState == .pausedByAdBreak else { return }
+        
         currentPlaybackStartTimestamp = Date()
+        playbackState = .playing
     }
 
     // MARK: ad content
@@ -689,29 +697,32 @@ let PlayerOvp = "player_ovp"
     }
     
     private func logAdSummary() {
-        if (self.adContent != nil) {
-            if (self.adContent?.adStartTimestamp != nil) {
-                self.adContent?.adEndTimestamp = Date()
-                self.mediaTotalAdTimeSpent += self.adContent!.adEndTimestamp!.timeIntervalSince(self.adContent!.adStartTimestamp!)
+        guard let adContent = adContent else { return }
+        
+        if let start = adContent.adStartTimestamp {
+            if adContent.adEndTimestamp == nil {
+                let end = Date()
+                adContent.adEndTimestamp = end
+                mediaTotalAdTimeSpent += end.timeIntervalSince(start)
             }
-            
-            let event = MPEvent.init(name: MPAdSummary, type: .media)!
-            let mediaEvent = self.makeMediaEvent(name: .adSessionSummary, options: nil)
-            
-            var customAttributes: [String:Any] = mediaEvent.getEventAttributes()
-            customAttributes[adBreakIdKey] = self.adBreak?.id
-            customAttributes[adContentIdKey] = self.adContent?.id
-            customAttributes[adContentStartTimestampKey] = self.adContent?.adStartTimestamp
-            customAttributes[adContentEndTimestampKey] = self.adContent?.adEndTimestamp
-            customAttributes[adContentTitleKey] = self.adContent?.title
-            customAttributes[adContentSkippedKey] = self.adContent?.adSkipped
-            customAttributes[adContentCompletedKey] = self.adContent?.adCompleted
-            
-            event.customAttributes = customAttributes
-            coreSDK.logEvent(event)
-            
-            self.adContent = nil
         }
+        
+        let event = MPEvent.init(name: MPAdSummary, type: .media)!
+        let mediaEvent = self.makeMediaEvent(name: .adSessionSummary, options: nil)
+        
+        var customAttributes: [String:Any] = mediaEvent.getEventAttributes()
+        customAttributes[adBreakIdKey] = adBreak?.id
+        customAttributes[adContentIdKey] = adContent.id
+        customAttributes[adContentStartTimestampKey] = adContent.adStartTimestamp
+        customAttributes[adContentEndTimestampKey] = adContent.adEndTimestamp
+        customAttributes[adContentTitleKey] = adContent.title
+        customAttributes[adContentSkippedKey] = adContent.adSkipped
+        customAttributes[adContentCompletedKey] = adContent.adCompleted
+        
+        event.customAttributes = customAttributes
+        coreSDK.logEvent(event)
+        
+        self.adContent = nil
     }
 }
 
@@ -1047,4 +1058,10 @@ public enum MPMediaEventNameString: String, RawRepresentable {
     case milestone = "Milestone"  //47
     case sessionSummary = "Media Session Summary"  //48
     case adSessionSummary = "Ad Session Summary"  //49
+}
+
+private enum PlaybackState {
+    case playing
+    case pausedByUser
+    case pausedByAdBreak
 }
