@@ -25,12 +25,11 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Get version from podspec
-        id: get-version
+      - name: Get current version
+        id: version-file
         run: |
-          version=$(grep "s.version" mParticle-Apple-Media-SDK.podspec | sed -E 's/.*"([0-9.]+)".*/\1/')
-          echo "version=$version" >> $GITHUB_OUTPUT
-          echo "Publishing version: $version"
+          version_from_file=$(head -n 1 VERSION)
+          echo "release-version=$version_from_file" >> $GITHUB_OUTPUT
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -41,13 +40,22 @@ jobs:
         run: |
           gem install cocoapods
 
-      - name: Create and push git tag
-        run: |
-          version="${{ steps.get-version.outputs.version }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "$version" -m "Release $version"
-          git push origin "$version"
+      - uses: ffurrer2/extract-release-notes@cae32133495112d23e3569ad04fef240ba4e7bc8 # v2.3.0
+        id: extract-release-notes
+        with:
+          changelog_file: CHANGELOG.md
+
+      - name: Changelog
+        run: echo "${{ steps.extract-release-notes.outputs.release_notes }}"
+
+      - name: Create Github release
+        uses: ncipollo/release-action@b7eabc95ff50cbeeedec83973935c8f306dfcd0b # v1.20.0
+        with:
+          makeLatest: true
+          tag: ${{ steps.version-file.outputs.release-version }}
+          body: |
+            ## Release notes:
+            ${{ steps.extract-release-notes.outputs.release_notes }}
 
       - name: Push to Trunk
         env:
