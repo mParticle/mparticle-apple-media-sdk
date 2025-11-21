@@ -9,15 +9,6 @@ The release process is automated through two GitHub Actions workflows:
 1. **Create Release PR** (`.github/workflows/draft-release-publish.yml`) - Creates a pull request with the version bump
 2. **Publish Release** (`.github/workflows/release-from-main.yml`) - Automatically publishes the release when the PR is merged
 
-## Prerequisites
-
-Before you can release, ensure:
-
-1. You have maintainer access to this repository
-2. The `COCOAPODS_TRUNK_TOKEN` secret is configured in the repository settings
-   - Go to: Repository Settings → Secrets and variables → Actions
-   - This token is used to publish the pod to CocoaPods trunk
-
 ## Release Process
 
 ### Step 1: Create a Release PR
