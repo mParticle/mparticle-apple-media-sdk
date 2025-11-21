@@ -37,25 +37,14 @@ jobs:
           ruby-version: '3.0'
 
       - name: Install CocoaPods
-        run: |
-          gem install cocoapods
-
-      - uses: ffurrer2/extract-release-notes@cae32133495112d23e3569ad04fef240ba4e7bc8 # v2.3.0
-        id: extract-release-notes
-        with:
-          changelog_file: CHANGELOG.md
-
-      - name: Changelog
-        run: echo "${{ steps.extract-release-notes.outputs.release_notes }}"
+        run: gem install cocoapods
 
       - name: Create Github release
         uses: ncipollo/release-action@b7eabc95ff50cbeeedec83973935c8f306dfcd0b # v1.20.0
         with:
           makeLatest: true
           tag: ${{ steps.version-file.outputs.release-version }}
-          body: |
-            ## Release notes:
-            ${{ steps.extract-release-notes.outputs.release_notes }}
+          generateReleaseNotes: true
 
       - name: Push to Trunk
         env:
