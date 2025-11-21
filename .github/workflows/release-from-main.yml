@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'mParticle-Apple-Media-SDK.podspec'
+      - VERSION
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -15,8 +15,7 @@ permissions:
   contents: write
 
 jobs:
-  publish-release:
-    if: github.event_name == 'push'
+  release-from-main:
     runs-on: macos-latest
     
     steps:

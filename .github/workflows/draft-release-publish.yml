@@ -21,7 +21,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  update-version:
+  publish-draft-release:
     if: github.event_name == 'workflow_dispatch'
     runs-on: macos-latest
     
@@ -46,10 +46,10 @@ jobs:
           level: ${{ github.event.inputs.bump-type }}
 
       - name: Update podspec version
-        run: |
-          new_version="${{ steps.bump-version.outputs.new_version }}"
-          echo "Updating podspec version to $new_version"
-          sed -i '' "s/s\.version[[:space:]]*=[[:space:]]*\"[0-9.]*\"/s.version          = \"${new_version}\"/" mParticle-Apple-Media-SDK.podspec
+        run: sed -i '' "s/s\.version[[:space:]]*=[[:space:]]*\"[0-9.]*\"/s.version = \"${{ steps.bump-version.outputs.new_version }}\"/" mParticle-Apple-Media-SDK.podspec
+
+      - name: Update VERSION file
+        run: echo "${{ steps.bump-version.outputs.new_version }}" > VERSION
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
@@ -61,7 +61,9 @@ jobs:
           body: |
             Preparing for release ${{ steps.bump-version.outputs.new_version }}
             
-            This PR updates the podspec version from ${{ steps.current-version.outputs.version }} to ${{ steps.bump-version.outputs.new_version }}
+            This PR updates the version from ${{ steps.current-version.outputs.version }} to ${{ steps.bump-version.outputs.new_version }} in:
+            - `mParticle-Apple-Media-SDK.podspec`
+            - `VERSION`
             
             Bump type: **${{ github.event.inputs.bump-type }}**
             
