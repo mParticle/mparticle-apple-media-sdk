@@ -1,0 +1,58 @@
+name: Release SDK
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'mParticle-Apple-Media-SDK.podspec'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish-release:
+    if: github.event_name == 'push'
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Get version from podspec
+        id: get-version
+        run: |
+          version=$(grep "s.version" mParticle-Apple-Media-SDK.podspec | sed -E 's/.*"([0-9.]+)".*/\1/')
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "Publishing version: $version"
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+
+      - name: Install CocoaPods
+        run: |
+          gem install cocoapods
+
+      - name: Create and push git tag
+        run: |
+          version="${{ steps.get-version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$version" -m "Release $version"
+          git push origin "$version"
+
+      - name: Push to Trunk
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+        run: |
+          pod trunk push --allow-warnings mParticle-Apple-Media-SDK.podspec
+
