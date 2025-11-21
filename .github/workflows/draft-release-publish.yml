@@ -11,11 +11,6 @@ on:
           - major
           - minor
           - patch
-  push:
-    branches:
-      - main
-    paths:
-      - 'mParticle-Apple-Media-SDK.podspec'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
