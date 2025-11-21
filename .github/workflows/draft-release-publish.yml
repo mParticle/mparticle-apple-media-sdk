@@ -22,7 +22,6 @@ permissions:
 
 jobs:
   publish-draft-release:
-    if: github.event_name == 'workflow_dispatch'
     runs-on: macos-latest
     
     steps:
