@@ -44,7 +44,7 @@ jobs:
           level: ${{ github.event.inputs.bump-type }}
 
       - name: Update podspec version
-        run: sed -i '' "s/s\.version[[:space:]]*=[[:space:]]*\"[0-9.]*\"/s.version = \"${{ steps.bump-version.outputs.new_version }}\"/" mParticle-Apple-Media-SDK.podspec
+        run: sed -i '' "s/s\.version[[:space:]]*=[[:space:]]*\"[0-9.]*\"/s.version          = \"${{ steps.bump-version.outputs.new_version }}\"/" mParticle-Apple-Media-SDK.podspec
 
       - name: Update VERSION file
         run: echo "${{ steps.bump-version.outputs.new_version }}" > VERSION
@@ -53,8 +53,8 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           commit-message: "Bump version to ${{ steps.bump-version.outputs.new_version }}"
-          branch: release/${{ steps.bump-version.outputs.new_version }}
-          title: "Release ${{ steps.bump-version.outputs.new_version }}"
+          branch: chore/release-${{ steps.bump-version.outputs.new_version }}
+          title: "chore: Release ${{ steps.bump-version.outputs.new_version }}"
           base: main
           body: |
             Preparing for release ${{ steps.bump-version.outputs.new_version }}
