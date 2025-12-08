@@ -39,16 +39,15 @@ jobs:
       - name: Install CocoaPods
         run: gem install cocoapods
 
-      - name: Create Github release
-        uses: ncipollo/release-action@b7eabc95ff50cbeeedec83973935c8f306dfcd0b # v1.20.0
-        with:
-          makeLatest: true
-          tag: ${{ steps.version-file.outputs.release-version }}
-          generateReleaseNotes: true
-
       - name: Push to Trunk
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
         run: |
           pod trunk push --allow-warnings mParticle-Apple-Media-SDK.podspec
 
+      - name: Create Github release
+        uses: ncipollo/release-action@b7eabc95ff50cbeeedec83973935c8f306dfcd0b # v1.20.0
+        with:
+          makeLatest: true
+          tag: ${{ steps.version-file.outputs.release-version }}
+          generateReleaseNotes: true
