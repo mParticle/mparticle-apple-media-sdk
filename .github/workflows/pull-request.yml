@@ -28,7 +28,7 @@ jobs:
     strategy:
       matrix:
         platform: [iOS]
-        scheme: [mParticle-Apple-Media-SDK, mParticle-Apple-Media-SDK-NoLocation]
+        scheme: [mParticle-Apple-Media-SDK]
         include:
           - platform: iOS
             device: iPhone 16 Pro

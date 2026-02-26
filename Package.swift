@@ -1,50 +1,30 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.5
 
 import PackageDescription
 
 let package = Package(
     name: "mParticle-Apple-Media-SDK",
-    platforms: [ .iOS(.v12), .tvOS(.v12) ],
+    platforms: [.iOS(.v15), .tvOS(.v15)],
     products: [
         .library(
             name: "mParticle-Apple-Media-SDK",
-            targets: ["mParticle-Apple-Media-SDK"]),
-        .library(
-            name: "mParticle-Apple-Media-SDK-NoLocation",
-            targets: ["mParticle-Apple-Media-SDK-NoLocation"]),
+            targets: ["mParticle-Apple-Media-SDK"])
     ],
     dependencies: [
-        .package(name: "mParticle-Apple-SDK",
-            url: "https://github.com/mParticle/mparticle-apple-sdk",
-            .upToNextMajor(from: "8.37.0")),
+        .package(url: "https://github.com/mParticle/mparticle-apple-sdk",
+                 branch: "workstation/9.0-Release")
     ],
     targets: [
         .target(
             name: "mParticle-Apple-Media-SDK",
             dependencies: [
-                .product(
-                   name: "mParticle-Apple-SDK",
-                   package: "mParticle-Apple-SDK"
-               )
+                .product(name: "mParticle-Apple-SDK",
+                         package: "mparticle-apple-sdk")
             ],
             path: "mParticle-Apple-Media-SDK",
             exclude: ["Info.plist"],
             resources: [.process("PrivacyInfo.xcprivacy")],
             publicHeadersPath: "."
-        ),
-        .target(
-            name: "mParticle-Apple-Media-SDK-NoLocation",
-            dependencies: [
-                .product(
-                   name: "mParticle-Apple-SDK-NoLocation",
-                   package: "mParticle-Apple-SDK"
-               ),
-            ],
-            path: "mParticle-Apple-Media-SDK-NoLocation",
-            exclude: ["Info.plist"],
-            resources: [.process("PrivacyInfo.xcprivacy")],
-            publicHeadersPath: ".",
-            cSettings: [.define("MP_NO_LOCATION")]
         )
     ]
 )
