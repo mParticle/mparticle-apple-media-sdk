@@ -12,7 +12,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/mParticle/mparticle-apple-sdk",
-                 branch: "workstation/9.0-Release")
+                 branch: "main")
     ],
     targets: [
         .target(
