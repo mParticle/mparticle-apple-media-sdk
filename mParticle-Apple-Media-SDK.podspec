@@ -22,6 +22,6 @@ Pod::Spec.new do |s|
       'mParticle-Apple-Media-SDK-Shared/**/*.{h,m,mm,swift}'
     ]
 
-    s.dependency 'mParticle-Apple-SDK', '~> 9.0'
+    s.dependency 'mParticle-Apple-SDK', '>= 8.0'
 
 end

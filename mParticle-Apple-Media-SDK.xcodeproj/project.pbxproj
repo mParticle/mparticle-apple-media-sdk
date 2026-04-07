@@ -523,7 +523,7 @@
 			repositoryURL = "https://github.com/mParticle/mparticle-apple-sdk";
 			requirement = {
 				kind = branch;
-				branch = "workstation/9.0-Release";
+				branch = main;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
