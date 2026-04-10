@@ -18,17 +18,7 @@ Please be aware that this SDK is built as an extension of and requires the use o
 
 ## Get the SDK
 
-The mParticle-Apple-Media-SDK is available via [CocoaPods](https://cocoapods.org/?q=mparticle) or [Swift Package Manager](https://github.com/swiftlang/swift-package-manager). Follow the instructions below based on your preference.
-
-#### CocoaPods
-
-To integrate the Media SDK using CocoaPods, specify it in your Podfile:
-
-```ruby
-target '<Your Target>' do
-    pod 'mParticle-Apple-Media-SDK', '~> 1.0'
-end
-```
+The mParticle-Apple-Media-SDK is available via [Swift Package Manager](https://github.com/swiftlang/swift-package-manager) or [CocoaPods](https://cocoapods.org/?q=mparticle). Follow the instructions below based on your preference.
 
 #### Swift Package Manager
 
@@ -37,6 +27,16 @@ To integrate the SDK using Swift Package Manager, open your Xcode project and cl
 Enter the repository URL `https://github.com/mParticle/mparticle-apple-media-sdk` in the search box on the top right, choose `mparticle-apple-media-sdk` from the list of packages, and change "Dependency Rule" to "Up to Next Major Version". Then click the "Add Package" button on the bottom right.
 
 Select the `mParticle-Apple-Media-SDK` package product and click "Add Package".
+
+#### CocoaPods
+
+To integrate the Media SDK using CocoaPods, specify it in your Podfile:
+
+```ruby
+target '<Your Target>' do
+    pod 'mParticle-Apple-Media-SDK', '~> 2.0'
+end
+```
 
 ## Include and Initialize the SDK
 
@@ -86,8 +86,6 @@ mediaSession.logPause(options: options)
 #### Objective-C
 
 The following example demonstrates how to import and use the Apple Media SDK in an Objective-C project. It shows the correct module and header import statements depending on your build setup.
-
-For apps supporting iOS 8 and above, Apple recommends using the import syntax for **modules** or **semantic import**.
 
 If you are using mParticle as a framework, your import statement will be as follows:
 
