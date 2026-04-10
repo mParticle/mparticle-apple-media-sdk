@@ -87,8 +87,6 @@ mediaSession.logPause(options: options)
 
 The following example demonstrates how to import and use the Apple Media SDK in an Objective-C project. It shows the correct module and header import statements depending on your build setup.
 
-For apps supporting iOS 15.6 and above, Apple recommends using the import syntax for **modules** or **semantic import**.
-
 If you are using mParticle as a framework, your import statement will be as follows:
 
 ```objective-c
