@@ -18,7 +18,15 @@ Please be aware that this SDK is built as an extension of and requires the use o
 
 ## Get the SDK
 
-The mParticle-Apple-Media-SDK is available via [CocoaPods](https://cocoapods.org/?q=mparticle) or [Swift Package Manager](https://github.com/swiftlang/swift-package-manager). Follow the instructions below based on your preference.
+The mParticle-Apple-Media-SDK is available via [Swift Package Manager](https://github.com/swiftlang/swift-package-manager) or [CocoaPods](https://cocoapods.org/?q=mparticle). Follow the instructions below based on your preference.
+
+#### Swift Package Manager
+
+To integrate the SDK using Swift Package Manager, open your Xcode project and click on your project in the file list on the left, click on your Project name in the middle of the window, click on the "Package Dependencies" tab, and click the "+" button underneath the Packages list.
+
+Enter the repository URL `https://github.com/mParticle/mparticle-apple-media-sdk` in the search box on the top right, choose `mparticle-apple-media-sdk` from the list of packages, and change "Dependency Rule" to "Up to Next Major Version". Then click the "Add Package" button on the bottom right.
+
+Select the `mParticle-Apple-Media-SDK` package product and click "Add Package".
 
 #### CocoaPods
 
@@ -29,14 +37,6 @@ target '<Your Target>' do
     pod 'mParticle-Apple-Media-SDK', '~> 2.0'
 end
 ```
-
-#### Swift Package Manager
-
-To integrate the SDK using Swift Package Manager, open your Xcode project and click on your project in the file list on the left, click on your Project name in the middle of the window, click on the "Package Dependencies" tab, and click the "+" button underneath the Packages list.
-
-Enter the repository URL `https://github.com/mParticle/mparticle-apple-media-sdk` in the search box on the top right, choose `mparticle-apple-media-sdk` from the list of packages, and change "Dependency Rule" to "Up to Next Major Version". Then click the "Add Package" button on the bottom right.
-
-Select the `mParticle-Apple-Media-SDK` package product and click "Add Package".
 
 ## Include and Initialize the SDK
 
