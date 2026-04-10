@@ -1,4 +1,6 @@
 name: Create draft release
+# Ensure the manual release process only starts from the main branch.
+# Bump version and open a release PR that triggers publish-on-main after merge.
 
 on:
   workflow_dispatch:
@@ -23,12 +25,15 @@ permissions:
 jobs:
   publish-draft-release:
     runs-on: macos-latest
-    
+    env:
+      GITHUB_TOKEN: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
           ref: main
+          fetch-depth: 0
+          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
 
       - name: Get current version
         id: version-file
@@ -43,28 +48,54 @@ jobs:
           current_version: ${{ steps.version-file.outputs.release-version }}
           level: ${{ github.event.inputs.bump-type }}
 
+      - name: Set version environment variable
+        run: |
+          VERSION=$(echo "${{ steps.bump-version.outputs.new_version }}" | sed 's/^v//')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "📌 ${{ steps.version-file.outputs.release-version }} → $VERSION (${{ github.event.inputs.bump-type }})"
+
+      - name: Setup git config
+        run: |
+          git config user.email "developers@mparticle.com"
+          git config user.name "mParticle Automation"
+
+      - name: Create release branch
+        run: |
+          git push origin --delete chore/release-${VERSION} 2>/dev/null || true
+          git checkout -b chore/release-${VERSION}
+
       - name: Update podspec version
-        run: sed -i '' "s/s\.version[[:space:]]*=[[:space:]]*\"[0-9.]*\"/s.version          = \"${{ steps.bump-version.outputs.new_version }}\"/" mParticle-Apple-Media-SDK.podspec
+        run: sed -i '' "s/s\.version[[:space:]]*=[[:space:]]*\"[0-9.]*\"/s.version          = \"${VERSION}\"/" mParticle-Apple-Media-SDK.podspec
 
       - name: Update VERSION file
-        run: echo "${{ steps.bump-version.outputs.new_version }}" > VERSION
+        run: echo "${VERSION}" > VERSION
+
+      - name: Commit version changes
+        run: |
+          git add \
+            mParticle-Apple-Media-SDK.podspec \
+            VERSION
+          git commit -m "Bump version to ${VERSION}"
+
+      - name: Push release branch
+        run: git push origin chore/release-${VERSION}
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          commit-message: "Bump version to ${{ steps.bump-version.outputs.new_version }}"
-          branch: chore/release-${{ steps.bump-version.outputs.new_version }}
-          title: "chore: Release ${{ steps.bump-version.outputs.new_version }}"
-          base: main
-          body: |
-            Preparing for release ${{ steps.bump-version.outputs.new_version }}
-            
-            This PR updates the version from ${{ steps.version-file.outputs.release-version }} to ${{ steps.bump-version.outputs.new_version }} in:
-            - `mParticle-Apple-Media-SDK.podspec`
-            - `VERSION`
-            
-            Bump type: **${{ github.event.inputs.bump-type }}**
-            
-            **After merging**, this workflow will automatically:
-            - Create a git tag `${{ steps.bump-version.outputs.new_version }}`
-            - Publish to CocoaPods trunk
+        env:
+          GH_TOKEN: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
+        run: |
+          gh pr create \
+            --base main \
+            --head chore/release-${VERSION} \
+            --title "chore: Release ${VERSION}" \
+            --body "Preparing for release ${VERSION}
+
+          This PR updates the version from ${{ steps.version-file.outputs.release-version }} to ${VERSION} in:
+          - \`mParticle-Apple-Media-SDK.podspec\`
+          - \`VERSION\`
+
+          Bump type: **${{ github.event.inputs.bump-type }}**
+
+          **After merging**, this workflow will automatically:
+          - Create a git tag \`${VERSION}\`
+          - Publish to CocoaPods trunk"
