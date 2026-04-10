@@ -27,23 +27,16 @@ To integrate the Media SDK using CocoaPods, specify it in your Podfile:
 ```ruby
 target '<Your Target>' do
     pod 'mParticle-Apple-Media-SDK', '~> 1.0'
-    
-    # If you'd like to use a version of the Media SDK that doesn't include any location tracking
-    # nor links the CoreLocation framework, use this pod instead:
-    # pod 'mParticle-Apple-Media-SDK/mParticleMediaNoLocation', '~> 1.0'
 end
 ```
-Configuring your `Podfile` with the statement above will include only the _Core_ mParticle Media SDK.
 
 #### Swift Package Manager
 
 To integrate the SDK using Swift Package Manager, open your Xcode project and click on your project in the file list on the left, click on your Project name in the middle of the window, click on the "Package Dependencies" tab, and click the "+" button underneath the Packages list.
 
-Enter the repository URL `https://github.com/mParticle/mparticle-apple-media-sdk` in the search box on the top right, choose `mparticle-apple-media-sdk` from the list of pacakges, and change "Dependency Rule" to "Up to Next Major Version". Then click the "Add Package" button on the bottom right.
+Enter the repository URL `https://github.com/mParticle/mparticle-apple-media-sdk` in the search box on the top right, choose `mparticle-apple-media-sdk` from the list of packages, and change "Dependency Rule" to "Up to Next Major Version". Then click the "Add Package" button on the bottom right.
 
-Then choose either the "Package Product" called `mParticle-Apple-Media-SDK`, or if you'd like to use a version of the SDK that doesn't include any location tracking nor links the CoreLocation framework choose `mParticle-Apple-Media-SDK-NoLocation`.
-
-**IMPORTANT:** If you choose the `mParticle-Apple-Media-SDK-NoLocation` package product, you will need to import the SDK using `import mParticle_Apple_Media_SDK_NoLocation` instead of `import mParticle_Apple_Media_SDK` as shown in the rest of the documentation and this README. 
+Select the `mParticle-Apple-Media-SDK` package product and click "Add Package".
 
 ## Include and Initialize the SDK
 
