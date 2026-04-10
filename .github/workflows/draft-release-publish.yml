@@ -28,7 +28,6 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
-          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
 
       - name: Get current version
         id: version-file
@@ -60,7 +59,6 @@ jobs:
       - name: Create release PR
         uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         with:
-          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
           commit-message: "Prepare release ${{ steps.bump-version.outputs.new_version }}"
           branch: chore/release-${{ steps.bump-version.outputs.new_version }}
           title: "chore: Release ${{ steps.bump-version.outputs.new_version }}"
