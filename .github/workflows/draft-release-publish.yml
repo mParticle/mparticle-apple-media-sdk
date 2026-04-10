@@ -1,18 +1,16 @@
-name: Create draft release
-# Ensure the manual release process only starts from the main branch.
-# Bump version and open a release PR that triggers publish-on-main after merge.
+name: Release – Draft
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # checkov:skip=CKV_GHA_7
     inputs:
       bump-type:
-        description: Specify if the version should be bumped as major, minor, patch
+        description: Specify if the version should be bumped as patch, minor, or major
         required: true
         type: choice
         options:
-          - major
-          - minor
           - patch
+          - minor
+          - major
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -23,15 +21,12 @@ permissions:
   pull-requests: write
 
 jobs:
-  publish-draft-release:
+  prepare-release:
     runs-on: macos-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: main
           fetch-depth: 0
           token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
 
@@ -43,59 +38,36 @@ jobs:
 
       - name: Bump version
         id: bump-version
-        uses: actions-ecosystem/action-bump-semver@v1
+        uses: actions-ecosystem/action-bump-semver@34e334551143a5301f38c830e44a22273c6ff5c5 # v1.0.0
         with:
           current_version: ${{ steps.version-file.outputs.release-version }}
-          level: ${{ github.event.inputs.bump-type }}
-
-      - name: Set version environment variable
-        run: |
-          VERSION=$(echo "${{ steps.bump-version.outputs.new_version }}" | sed 's/^v//')
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "📌 ${{ steps.version-file.outputs.release-version }} → $VERSION (${{ github.event.inputs.bump-type }})"
-
-      - name: Setup git config
-        run: |
-          git config user.email "developers@mparticle.com"
-          git config user.name "mParticle Automation"
-
-      - name: Create release branch
-        run: |
-          git push origin --delete chore/release-${VERSION} 2>/dev/null || true
-          git checkout -b chore/release-${VERSION}
-
-      - name: Update podspec version
-        run: sed -i '' "s/s\.version[[:space:]]*=[[:space:]]*\"[0-9.]*\"/s.version          = \"${VERSION}\"/" mParticle-Apple-Media-SDK.podspec
+          level: ${{ github.event.inputs.bump-type || 'patch' }}
 
       - name: Update VERSION file
-        run: echo "${VERSION}" > VERSION
+        run: echo "${{ steps.bump-version.outputs.new_version }}" > VERSION
 
-      - name: Commit version changes
+      - name: Update podspec version
         run: |
-          git add \
-            mParticle-Apple-Media-SDK.podspec \
-            VERSION
-          git commit -m "Bump version to ${VERSION}"
+          version="${{ steps.bump-version.outputs.new_version }}"
+          sed -i '' "s/s\.version[[:space:]]*=[[:space:]]*\"[0-9.]*\"/s.version          = \"${version}\"/" mParticle-Apple-Media-SDK.podspec
 
-      - name: Push release branch
-        run: git push origin chore/release-${VERSION}
+      - name: Generate changelog from git history
+        id: changelog
+        uses: ROKT/rokt-workflows/actions/generate-changelog@main
+        with:
+          version: ${{ steps.bump-version.outputs.new_version }}
 
-      - name: Create Pull Request
-        env:
-          GH_TOKEN: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
-        run: |
-          gh pr create \
-            --base main \
-            --head chore/release-${VERSION} \
-            --title "chore: Release ${VERSION}" \
-            --body "Preparing for release ${VERSION}
-
-          This PR updates the version from ${{ steps.version-file.outputs.release-version }} to ${VERSION} in:
-          - \`mParticle-Apple-Media-SDK.podspec\`
-          - \`VERSION\`
-
-          Bump type: **${{ github.event.inputs.bump-type }}**
-
-          **After merging**, this workflow will automatically:
-          - Create a git tag \`${VERSION}\`
-          - Publish to CocoaPods trunk"
+      - name: Create release PR
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
+        with:
+          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
+          commit-message: "Prepare release ${{ steps.bump-version.outputs.new_version }}"
+          branch: chore/release-${{ steps.bump-version.outputs.new_version }}
+          title: "chore: Release ${{ steps.bump-version.outputs.new_version }}"
+          base: ${{ github.ref_name }}
+          body: |
+            Preparing for release ${{ steps.bump-version.outputs.new_version }}
+            - Bumped version to ${{ steps.bump-version.outputs.new_version }}
+            - Updated changelog
+            ## Changelog
+            ${{ steps.changelog.outputs.release-notes }}
