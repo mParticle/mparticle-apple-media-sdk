@@ -1,16 +1,16 @@
-name: Create draft release
+name: Release – Draft
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # checkov:skip=CKV_GHA_7
     inputs:
       bump-type:
-        description: Specify if the version should be bumped as major, minor, patch
+        description: Specify if the version should be bumped as patch, minor, or major
         required: true
         type: choice
         options:
-          - major
-          - minor
           - patch
+          - minor
+          - major
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,14 +21,13 @@ permissions:
   pull-requests: write
 
 jobs:
-  publish-draft-release:
+  prepare-release:
     runs-on: macos-latest
-    
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: main
+          fetch-depth: 0
 
       - name: Get current version
         id: version-file
@@ -38,33 +37,35 @@ jobs:
 
       - name: Bump version
         id: bump-version
-        uses: actions-ecosystem/action-bump-semver@v1
+        uses: actions-ecosystem/action-bump-semver@34e334551143a5301f38c830e44a22273c6ff5c5 # v1.0.0
         with:
           current_version: ${{ steps.version-file.outputs.release-version }}
-          level: ${{ github.event.inputs.bump-type }}
-
-      - name: Update podspec version
-        run: sed -i '' "s/s\.version[[:space:]]*=[[:space:]]*\"[0-9.]*\"/s.version          = \"${{ steps.bump-version.outputs.new_version }}\"/" mParticle-Apple-Media-SDK.podspec
+          level: ${{ github.event.inputs.bump-type || 'patch' }}
 
       - name: Update VERSION file
         run: echo "${{ steps.bump-version.outputs.new_version }}" > VERSION
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
+      - name: Update podspec version
+        run: |
+          version="${{ steps.bump-version.outputs.new_version }}"
+          sed -i '' "s/s\.version[[:space:]]*=[[:space:]]*\"[0-9.]*\"/s.version          = \"${version}\"/" mParticle-Apple-Media-SDK.podspec
+
+      - name: Generate changelog from git history
+        id: changelog
+        uses: ROKT/rokt-workflows/actions/generate-changelog@main
         with:
-          commit-message: "Bump version to ${{ steps.bump-version.outputs.new_version }}"
+          version: ${{ steps.bump-version.outputs.new_version }}
+
+      - name: Create release PR
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
+        with:
+          commit-message: "Prepare release ${{ steps.bump-version.outputs.new_version }}"
           branch: chore/release-${{ steps.bump-version.outputs.new_version }}
           title: "chore: Release ${{ steps.bump-version.outputs.new_version }}"
-          base: main
+          base: ${{ github.ref_name }}
           body: |
             Preparing for release ${{ steps.bump-version.outputs.new_version }}
-            
-            This PR updates the version from ${{ steps.version-file.outputs.release-version }} to ${{ steps.bump-version.outputs.new_version }} in:
-            - `mParticle-Apple-Media-SDK.podspec`
-            - `VERSION`
-            
-            Bump type: **${{ github.event.inputs.bump-type }}**
-            
-            **After merging**, this workflow will automatically:
-            - Create a git tag `${{ steps.bump-version.outputs.new_version }}`
-            - Publish to CocoaPods trunk
+            - Bumped version to ${{ steps.bump-version.outputs.new_version }}
+            - Updated changelog
+            ## Changelog
+            ${{ steps.changelog.outputs.release-notes }}

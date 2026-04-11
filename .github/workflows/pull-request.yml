@@ -2,9 +2,13 @@ name: CI
 
 on:
   pull_request:
+  push:
+    branches:
+      - main
+      - workstation/*
 
 env:
-  XCODE_VERSION: "16.4"
+  XCODE_VERSION: "26.2"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
