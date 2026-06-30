@@ -9,10 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/2.0.0.
 
 ## [Unreleased]
 
-### Fixed
-
-- Correct the Swift Package Manager minimum platform to iOS/tvOS 15.6 so it matches the Core SDK requirement ([#38](https://github.com/mParticle/mparticle-apple-media-sdk/pull/38))
-
 ## [2.0.0] - 2026-04-10
 
 ### Breaking Changes
