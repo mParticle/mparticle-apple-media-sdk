@@ -52,7 +52,7 @@ jobs:
 
       - name: Generate changelog from git history
         id: changelog
-        uses: ROKT/rokt-workflows/actions/generate-changelog@main
+        uses: ROKT/rokt-workflows/actions/generate-changelog@29fed8dd6d3e114dcebf9e0e535ca76bc158210a # main
         with:
           version: ${{ steps.bump-version.outputs.new_version }}
           changelog-path: CHANGELOG.md
