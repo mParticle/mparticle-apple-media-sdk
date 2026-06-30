@@ -27,6 +27,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          ref: main
           fetch-depth: 0
 
       - name: Get current version
@@ -63,7 +64,7 @@ jobs:
           commit-message: "chore: Release ${{ steps.bump-version.outputs.new_version }}"
           branch: chore/release-${{ steps.bump-version.outputs.new_version }}
           title: "chore: Release ${{ steps.bump-version.outputs.new_version }}"
-          base: ${{ github.ref_name }}
+          base: main
           body: |
             Preparing for release ${{ steps.bump-version.outputs.new_version }}
 
