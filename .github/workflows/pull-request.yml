@@ -1,4 +1,4 @@
-name: CI
+name: Pull Request
 
 on:
   pull_request:
@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - workstation/*
+      - chore/release*
 
 env:
   XCODE_VERSION: "26.2"
@@ -23,9 +24,11 @@ permissions:
 jobs:
   pr-branch-check-name:
     name: "Check PR for semantic branch name"
+    if: github.event_name == 'pull_request'
     uses: mParticle/mparticle-workflows/.github/workflows/pr-branch-check-name.yml@stable
   pr-title-check:
     name: "Check PR for semantic title"
+    if: github.event_name == 'pull_request'
     uses: mParticle/mparticle-workflows/.github/workflows/pr-title-check.yml@stable
 
   native-unit-tests:
@@ -39,10 +42,12 @@ jobs:
     runs-on: macOS-15
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+        uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
 
       - name: Run iOS unit tests
         run: xcodebuild -project mParticle-Apple-Media-SDK.xcodeproj -scheme ${{ matrix.scheme }} -destination 'platform=${{ matrix.platform }} Simulator,name=${{ matrix.device }},OS=latest' test
