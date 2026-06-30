@@ -1,0 +1,72 @@
+name: Release – Draft
+
+on:
+  workflow_dispatch: # checkov:skip=CKV_GHA_7
+    inputs:
+      bump-type:
+        description: Specify if the version should be bumped as patch, minor, or major
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  prepare-release:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Get current version
+        id: version-file
+        run: |
+          version_from_file=$(head -n 1 VERSION)
+          echo "release-version=$version_from_file" >> $GITHUB_OUTPUT
+
+      - name: Bump version
+        id: bump-version
+        uses: actions-ecosystem/action-bump-semver@34e334551143a5301f38c830e44a22273c6ff5c5 # v1.0.0
+        with:
+          current_version: ${{ steps.version-file.outputs.release-version }}
+          level: ${{ github.event.inputs.bump-type || 'patch' }}
+
+      - name: Update VERSION file
+        run: echo "${{ steps.bump-version.outputs.new_version }}" > VERSION
+
+      - name: Update podspec version
+        run: |
+          version="${{ steps.bump-version.outputs.new_version }}"
+          sed -i '' "s/s\.version[[:space:]]*=[[:space:]]*\"[0-9.]*\"/s.version          = \"${version}\"/" mParticle-Apple-Media-SDK.podspec
+
+      - name: Generate changelog from git history
+        id: changelog
+        uses: ROKT/rokt-workflows/actions/generate-changelog@29fed8dd6d3e114dcebf9e0e535ca76bc158210a # main
+        with:
+          version: ${{ steps.bump-version.outputs.new_version }}
+          changelog-path: CHANGELOG.md
+
+      - name: Create release PR
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          commit-message: "chore: Release ${{ steps.bump-version.outputs.new_version }}"
+          branch: chore/release-${{ steps.bump-version.outputs.new_version }}
+          title: "chore: Release ${{ steps.bump-version.outputs.new_version }}"
+          base: main
+          body: |
+            Preparing for release ${{ steps.bump-version.outputs.new_version }}
+
+            ## Changelog
+            ${{ steps.changelog.outputs.release-notes }}

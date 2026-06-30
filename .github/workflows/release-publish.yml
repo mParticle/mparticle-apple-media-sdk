@@ -1,0 +1,112 @@
+name: Release – Publish
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - VERSION
+      - CHANGELOG.md
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  detect:
+    name: Detect release
+    runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.diff.outputs.release }}
+      version: ${{ steps.versions.outputs.version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Diff root VERSION
+        id: diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          RELEASE=false
+          BASE="${{ github.event.before }}"
+          if [[ -z "$BASE" || "$BASE" == "0000000000000000000000000000000000000000" ]]; then
+            BASE=$(git rev-parse HEAD^ 2>/dev/null || true)
+          fi
+          if [[ -n "$BASE" ]]; then
+            FILES=$(git diff --name-only "$BASE" "${{ github.sha }}" || true)
+            echo "$FILES"
+            while IFS= read -r line; do
+              [[ "$line" == "VERSION" ]] && RELEASE=true
+            done <<< "$FILES"
+          fi
+          echo "release=$RELEASE" >> "$GITHUB_OUTPUT"
+
+      - name: Read version (single source of truth)
+        id: versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "version=$(head -n 1 VERSION | tr -d '\r\n ')" >> "$GITHUB_OUTPUT"
+
+  create-release:
+    name: Create GitHub release
+    needs: detect
+    if: needs.detect.outputs.release == 'true'
+    runs-on: macos-latest
+    outputs:
+      release_version: ${{ steps.version-file.outputs.release-version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Get current version
+        id: version-file
+        run: |
+          version_from_file=$(head -n 1 VERSION)
+          echo "release-version=$version_from_file" >> $GITHUB_OUTPUT
+
+      - name: Get changelog content
+        id: extract-release-notes
+        uses: ffurrer2/extract-release-notes@273da39a24fb7db106a35526c8162815faffd31d # v3.1.0
+        with:
+          changelog_file: CHANGELOG.md
+          release_notes_file: ${{ steps.version-file.outputs.release-version }}.md
+
+      - name: Create Release
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        with:
+          tag_name: ${{ steps.version-file.outputs.release-version }}
+          name: Release ${{ steps.version-file.outputs.release-version }}
+          make_latest: true
+          body: |
+            Release ${{ steps.version-file.outputs.release-version }}
+            ## Changelog
+            ${{ steps.extract-release-notes.outputs.release_notes }}
+
+  publish-cocoapods:
+    name: Publish to CocoaPods
+    needs: [detect, create-release]
+    if: needs.detect.outputs.release == 'true' && needs.create-release.result == 'success'
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Install CocoaPods
+        run: sudo gem install cocoapods
+
+      - name: Push to Trunk
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+        run: pod trunk push --allow-warnings mParticle-Apple-Media-SDK.podspec
