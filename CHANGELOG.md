@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/2.0.0.
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-06-30
+
+### Fixed
+
+- Bump SPM min platform to iOS/tvOS 15.6 ([#38](https://github.com/mParticle/mparticle-apple-media-sdk/pull/38))
+
+### Changed
+
+- Align release process with rokt-sdk-ios ([#34](https://github.com/mParticle/mparticle-apple-media-sdk/pull/34))
+- Update README for v2 ([#37](https://github.com/mParticle/mparticle-apple-media-sdk/pull/37))
+- Add v2 migration guide ([#36](https://github.com/mParticle/mparticle-apple-media-sdk/pull/36))
+
 ## [2.0.0] - 2026-04-10
 
 ### Breaking Changes
