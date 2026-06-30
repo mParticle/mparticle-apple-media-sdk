@@ -2,16 +2,21 @@ name: iOS SDK Build and Lint
 
 on: [pull_request]
 
+env:
+  XCODE_VERSION: "26.2"
+
 jobs:
   pod-lint:
     runs-on: macOS-15
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
-      
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.4.app
-        
+        uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
       - name: Update xcodeproj gem
         run: sudo gem install xcodeproj
 
@@ -24,14 +29,16 @@ jobs:
       - name: Undo twitter change to podspec
         run: git checkout *.podspec
 
-  xcode-build: 
+  xcode-build:
     runs-on: macOS-15
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.4.app
+        uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
 
       - name: Build SDK
         run: |
@@ -46,10 +53,12 @@ jobs:
     runs-on: macOS-15
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.4.app
+        uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
 
       - name: Run static analyzer
         run: |
