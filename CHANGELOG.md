@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/2.0.0.
 
 ## [Unreleased]
 
-### Fixed
+## [2.0.2] - 2026-07-02
 
-- Revert minimum iOS/tvOS deployment target back to 15.0 (reverts #38)
+### Removed
+
+- Roll back minimum iOS/tvOS deployment target to 15.0 ([#40](https://github.com/mParticle/mparticle-apple-media-sdk/pull/40))
 
 ## [2.0.1] - 2026-06-30
 
