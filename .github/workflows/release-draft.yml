@@ -16,17 +16,19 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   prepare-release:
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: macos-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           ref: main
           fetch-depth: 0
 
@@ -44,16 +46,20 @@ jobs:
           level: ${{ github.event.inputs.bump-type || 'patch' }}
 
       - name: Update VERSION file
-        run: echo "${{ steps.bump-version.outputs.new_version }}" > VERSION
+        env:
+          NEW_VERSION: ${{ steps.bump-version.outputs.new_version }}
+        run: echo "$NEW_VERSION" > VERSION
 
       - name: Update podspec version
+        env:
+          NEW_VERSION: ${{ steps.bump-version.outputs.new_version }}
         run: |
-          version="${{ steps.bump-version.outputs.new_version }}"
+          version="$NEW_VERSION"
           sed -i '' "s/s\.version[[:space:]]*=[[:space:]]*\"[0-9.]*\"/s.version          = \"${version}\"/" mParticle-Apple-Media-SDK.podspec
 
       - name: Generate changelog from git history
         id: changelog
-        uses: ROKT/rokt-workflows/actions/generate-changelog@29fed8dd6d3e114dcebf9e0e535ca76bc158210a # main
+        uses: ROKT/rokt-workflows/actions/generate-changelog@da0c5fd5d38e9cf113a24ec9aaea079cc7d0bc40 # zizmor: ignore[ref-version-mismatch]
         with:
           version: ${{ steps.bump-version.outputs.new_version }}
           changelog-path: CHANGELOG.md
