@@ -12,13 +12,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
   detect:
     name: Detect release
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       release: ${{ steps.diff.outputs.release }}
       version: ${{ steps.versions.outputs.version }}
@@ -32,15 +33,18 @@ jobs:
       - name: Diff root VERSION
         id: diff
         shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           RELEASE=false
-          BASE="${{ github.event.before }}"
+          BASE="$BEFORE_SHA"
           if [[ -z "$BASE" || "$BASE" == "0000000000000000000000000000000000000000" ]]; then
             BASE=$(git rev-parse HEAD^ 2>/dev/null || true)
           fi
           if [[ -n "$BASE" ]]; then
-            FILES=$(git diff --name-only "$BASE" "${{ github.sha }}" || true)
+            FILES=$(git diff --name-only "$BASE" "$HEAD_SHA" || true)
             echo "$FILES"
             while IFS= read -r line; do
               [[ "$line" == "VERSION" ]] && RELEASE=true
@@ -60,6 +64,8 @@ jobs:
     needs: detect
     if: needs.detect.outputs.release == 'true'
     runs-on: macos-latest
+    permissions:
+      contents: write
     outputs:
       release_version: ${{ steps.version-file.outputs.release-version }}
     steps:
@@ -82,21 +88,34 @@ jobs:
           release_notes_file: ${{ steps.version-file.outputs.release-version }}.md
 
       - name: Create Release
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
-        with:
-          tag_name: ${{ steps.version-file.outputs.release-version }}
-          name: Release ${{ steps.version-file.outputs.release-version }}
-          make_latest: true
-          body: |
-            Release ${{ steps.version-file.outputs.release-version }}
-            ## Changelog
-            ${{ steps.extract-release-notes.outputs.release_notes }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ steps.version-file.outputs.release-version }}
+          RELEASE_NOTES: ${{ steps.extract-release-notes.outputs.release_notes }}
+        run: |
+          {
+            printf 'Release %s\n## Changelog\n%s\n' "$RELEASE_VERSION" "$RELEASE_NOTES"
+          } > "$RUNNER_TEMP/release-body.md"
+          if gh release view "$RELEASE_VERSION" > /dev/null 2>&1; then
+            gh release edit "$RELEASE_VERSION" \
+              --title "Release $RELEASE_VERSION" \
+              --notes-file "$RUNNER_TEMP/release-body.md" \
+              --latest
+          else
+            gh release create "$RELEASE_VERSION" \
+              --target "$GITHUB_SHA" \
+              --title "Release $RELEASE_VERSION" \
+              --notes-file "$RUNNER_TEMP/release-body.md" \
+              --latest
+          fi
 
   publish-cocoapods:
     name: Publish to CocoaPods
     needs: [detect, create-release]
     if: needs.detect.outputs.release == 'true' && needs.create-release.result == 'success'
     runs-on: macos-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
