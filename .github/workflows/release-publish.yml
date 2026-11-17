@@ -114,6 +114,7 @@ jobs:
     needs: [detect, create-release]
     if: needs.detect.outputs.release == 'true' && needs.create-release.result == 'success'
     runs-on: macos-latest
+    environment: release
     permissions:
       contents: read
     steps:
